@@ -2,6 +2,8 @@ package ui;
 
 import model.WatchList;
 import model.Movie;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,18 +21,19 @@ public class WatchListApp {
     }
 
     // EFFECTS: main loop of the application, takes user input and go to the corresponding response
-    //          contiunes to run until contiune because false
+    //          contiunes to run until contiune becomes false
     private void runApplication() {
 
         String action;
         input = new Scanner(System.in);
+
+        watchList = new WatchList();
 
         while (contiune) {
             displayMenu();
 
             action = input.next();
             actionResponse(action);
-
         }
 
         System.out.println("Application is closed");
@@ -47,6 +50,12 @@ public class WatchListApp {
             removeFromList();
         } else if (action.equals("4")) {
             displaySortedWatchList();
+        } else if (action.equals("5")) {
+            markAsWatched();
+        } else if (action.equals("6")) {
+            giveScore();
+        } else if (action.equals("0")) {
+            displayAdditionInfo();
         } else if (action.equals("q")) {
             contiune = false;
         } else {
@@ -54,14 +63,69 @@ public class WatchListApp {
         }
     }
 
+    // EFFECTS: displays additional info for the selected movie
+    private void displayAdditionInfo() {
+
+        System.out.println("Please enter a movie name to view addition information:");
+        String name = input.next();
+        String watched;
+
+        for (Movie m : watchList.getFullList()) {
+            if (m.getTitle().equals(name)) {
+                if (m.isWatched()) {
+                    watched = "WATCHED";
+                } else {
+                    watched = "Not Watched";
+                }
+                System.out.println(m.getDescription() + ", " + watched + ", " + "Score: " + m.getScore() + "/5");
+            }
+        }
+    }
+
     // MODIFIES: this
-    // EFFECTS: remove a movie from to the watchlist based on title
+    // EFFECTS: give a movie from the watchlist a score based on title
+    private void giveScore() {
+
+        System.out.println("Please enter the name of the movie you wish to rate:");
+        String name = input.next();
+
+        System.out.println("Please give it a rating out of 5:");
+        int score = input.nextInt();
+
+        for (Movie m : watchList.getFullList()) {
+            if (m.getTitle().equals(name)) {
+                m.setScore(score);
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: mark a movie from the watchlist as watched based on title
+    private void markAsWatched() {
+
+        System.out.println("Please enter the name of the movie you wish to mark as watched:");
+        String name = input.next();
+
+        for (Movie m : watchList.getFullList()) {
+            if (m.getTitle().equals(name) && m.isWatched() != true) {
+                m.markAsWatched();
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: remove a movie from the watchlist based on title
     private void removeFromList() {
 
         System.out.println("Please enter the name of the movie you wish to remove:");
-        String name = input.nextLine();
+        String name = input.next();
 
+        ArrayList<Movie> newList = new ArrayList<Movie>();
         for (Movie m : watchList.getFullList()) {
+            newList.add(m);
+        }
+
+        for (Movie m : newList) {
             if (m.getTitle().equals(name)) {
                 watchList.removeFromList(m);
             }
@@ -88,17 +152,20 @@ public class WatchListApp {
     // EFFECTS: displays the movie titles in the watchlist
     private void displayWatchList() {
 
-        for (String s : watchList.getListOfTitles()) {
-            System.out.println(s);
+        for (Movie m : watchList.getFullList()) {
+            System.out.println(m.getTitle().toUpperCase() + ", " + "Year: "
+                    + m.getYear() + ", " + m.getDuration() + "min");
         }
     }
 
-    // EFFECTS: displays the movie titles in alphabetical order
+    // EFFECTS: displays the movie in alphabetical order based on title
     private void displaySortedWatchList() {
 
-        List<Movie> fullList = watchList.getListInAlphabetical();
-        for (Movie m : fullList) {
-            System.out.println(m.getTitle());
+        List<Movie> newList = watchList.getListInAlphabetical();
+
+        for (Movie m : newList) {
+            System.out.println(m.getTitle().toUpperCase() + ", " + "Year: "
+                    + m.getYear() + ", " + m.getDuration() + "min");
         }
     }
 
@@ -109,11 +176,10 @@ public class WatchListApp {
         System.out.println("\t2 -> add movie to watchlist");
         System.out.println("\t3 -> remove movie from watchlist");
         System.out.println("\t4 -> display watchlist in alphabetical order");
+        System.out.println("\t5 -> mark a movie as watched");
+        System.out.println("\t6 -> give a movie a score");
+        System.out.println("\t0 -> view additional info about movie");
         System.out.println("\tq -> exit application");
     }
-
-
-
-
 
 }
