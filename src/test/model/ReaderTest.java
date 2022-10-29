@@ -61,6 +61,7 @@ public class ReaderTest extends JsonTest {
 
             List<Movie> fullList = watchList.getFullList();
             checkMovieAttributes(5,false, fullList.get(0));
+            checkMovieAttributes(0,true, fullList.get(2));
 
         } catch (IOException e) {
             fail("Couldn't read from this file");
