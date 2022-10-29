@@ -24,5 +24,7 @@ frustrating at times. This is why I decided to create this project.
 - As a user, I want to be able to mark a movie as watched in my watchlist
 - As a user, I want to be able to select a movie on my watchlist and give it a rating out of 5
 - As a user, I want to be able to sort my watchlist alphabetically  
+- As a user, I want to be able to save my watchlist to a file
+- As a user, I want to be able to load a saved watchlist from file
 
  

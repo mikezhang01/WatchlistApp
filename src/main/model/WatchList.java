@@ -1,11 +1,15 @@
 package model;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import persistence.Writeable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 // Represents a movie watchlist, handles adding, removing and sorting the watchlist
-public class WatchList {
+public class WatchList implements Writeable {
 
     private ArrayList<Movie> watchList;
 
@@ -54,19 +58,6 @@ public class WatchList {
         return returnList;
     }
 
-    // EFFECTS: returns the list of not yet watched movies
-    //public List<Movie> getListOfNotWatched() {
-
-        //List<Movie> returnList = new ArrayList<Movie>();
-
-        //for (Movie m : watchList) {
-            //if (m.isWatched() == false) {
-                //returnList.add(m);
-            //}
-        //}
-        //return returnList;
-    //}
-
     // EFFECTS: returns the watchlist sorted in alphabetical order
     public List<Movie> getListInAlphabetical() {
 
@@ -75,4 +66,23 @@ public class WatchList {
         return watchList;
     }
 
+
+    // EFFECTS: returns watchlist as a JSONObject
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("Movies", moviesToJson());
+        return json;
+    }
+
+    // EFFECTS: returns movies in this watchlist as a JSON array
+    private JSONArray moviesToJson() {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Movie m : watchList) {
+            jsonArray.put(m.toJson());
+        }
+
+        return jsonArray;
+    }
 }

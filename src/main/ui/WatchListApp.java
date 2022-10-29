@@ -2,7 +2,11 @@ package ui;
 
 import model.WatchList;
 import model.Movie;
+import persistence.Reader;
+import persistence.Writer;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -10,13 +14,19 @@ import java.util.Scanner;
 // Represents the watchlist application
 public class WatchListApp {
 
+    private static final String JSON_LOCATION = "./data/watchList.json";
     private WatchList watchList;
     private Movie movie;
     private Scanner input;
     private boolean contiune = true;
+    private Writer jsonWriter;
+    private Reader jsonReader;
 
     // EFFECTS: runs the watchlist application
     public WatchListApp() {
+
+        jsonWriter = new Writer(JSON_LOCATION);
+        jsonReader = new Reader(JSON_LOCATION);
         runApplication();
     }
 
@@ -56,10 +66,39 @@ public class WatchListApp {
             giveScore();
         } else if (action.equals("0")) {
             displayAdditionInfo();
+        } else if (action.equals("8")) {
+            saveWatchList();
+        } else if (action.equals("9")) {
+            loadWatchList();
         } else if (action.equals("q")) {
             contiune = false;
         } else {
             System.out.println("Please enter a valid input");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: loads watchlist from file
+    private void loadWatchList() {
+
+        try {
+            watchList = jsonReader.read();
+            System.out.println("Loaded WatchList from " + JSON_LOCATION);
+        } catch (IOException e) {
+            System.out.println("Unable to load from file: " + JSON_LOCATION);
+        }
+    }
+
+    // EFFECTS: saves the watchlist to file
+    private void saveWatchList() {
+
+        try {
+            jsonWriter.open();
+            jsonWriter.write(watchList);
+            jsonWriter.close();
+            System.out.println("Saved WatchList to " + JSON_LOCATION);
+        } catch (FileNotFoundException e) {
+            System.out.println("Unable to write to file: " + JSON_LOCATION + " because it doesn't exist");
         }
     }
 
@@ -179,6 +218,8 @@ public class WatchListApp {
         System.out.println("\t5 -> mark a movie as watched");
         System.out.println("\t6 -> give a movie a score");
         System.out.println("\t0 -> view additional info about movie");
+        System.out.println("\t8 -> save watchlist");
+        System.out.println("\t9 -> load watchlist");
         System.out.println("\tq -> exit application");
     }
 

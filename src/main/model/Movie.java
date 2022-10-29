@@ -1,7 +1,10 @@
 package model;
 
+import org.json.JSONObject;
+import persistence.Writeable;
+
 // Represents a Movie object
-public class Movie {
+public class Movie implements Writeable {
 
     private String title;
     private int year;
@@ -61,5 +64,16 @@ public class Movie {
         return score;
     }
 
-
+    // EFFECTS: returns movie as a JSONObject
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("year", year);
+        json.put("duration", duration);
+        json.put("description", description);
+        json.put("watched", watched);
+        json.put("score", score);
+        return json;
+    }
 }
