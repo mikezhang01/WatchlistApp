@@ -66,7 +66,6 @@ public class WatchList implements Writeable {
         return watchList;
     }
 
-
     // EFFECTS: returns watchlist as a JSONObject
     @Override
     public JSONObject toJson() {
@@ -82,7 +81,6 @@ public class WatchList implements Writeable {
         for (Movie m : watchList) {
             jsonArray.put(m.toJson());
         }
-
         return jsonArray;
     }
 }

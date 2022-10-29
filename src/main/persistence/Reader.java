@@ -64,5 +64,4 @@ public class Reader {
         watchList.addToList(movie);
     }
 
-
 }

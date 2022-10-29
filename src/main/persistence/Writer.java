@@ -46,5 +46,4 @@ public class Writer {
         writer.print(json);
     }
 
-
 }
