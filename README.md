@@ -27,4 +27,38 @@ frustrating at times. This is why I decided to create this project.
 - As a user, I want to be able to save my watchlist to a file
 - As a user, I want to be able to load a saved watchlist from file
 
- 
+## Instructions for Grader
+
+- You can generate the first required event related to adding Xs to a Y by 
+  using the panel on the right to add a movie to the watchlist. First enter the Title, Year, Duration,
+  and Description of the movie into the text boxes. Then hit the Add button, a confirmation window
+  will pop up, and you can see the added movie displayed in the watchlist on the left panel.
+- You can generate the second required event related to removing Xs from a Y by selecting a movie
+  from the watchlist that is displayed on the left panel, then click the Remove button. This wll
+  remove the selected movie from the watchlist. 
+- You can locate my visual component by looking at the top left of the window, where I have changed
+  the frame Icon to a custom image clapperboard. 
+- Additionally, I also have 2 more visual components. 
+  The first one is the frame Icon for the Additional Info display window has also been changed to a 
+  different image by me. This can be accessed by selecting a movie then click the Additional Info button. 
+  Second one is everytime a movie is added (when the add button is clicked), a message will pop up that confirms
+  it, and on that pop-up window I added a custom popcorn image. 
+- You can save the state of my application by clicking the Save button at the bottom of the display. 
+- You can reload the state of my application by clicking the Load button at the bottom of the display.
+- All user stories from above have also been implemented in the GUI. To mark a movie as watched, select a
+  movie from the watchlist then click the Mark as Watched button. To rate a movie out of 5, select a
+  movie from the watchlist then click the Rate button. A new pop-up window will show up where the user can input
+  a score. To sort the watchlist in alphabetical order, clicked the Sort button and the watchlist
+  will be displayed alphabetically. 
+- The Additional Info will display more information about a selected movie in a new window. This
+  includes the description of the movie, if the movie has been watched, and the score of the movie. 
+  To see these, select a movie from the watchlist then click the Additional Info button. 
+
+## Resources
+
+- GUI's ListSelectionListener is inspired by ListDemo.java from https://docs.oracle.com/javase/tutorial/uiswing/examples/components/index.html
+- JSON Reader, Writer, and Tests are inspired by JsonSerializationDemo  provided
+- Non-Copyrighted images used in GUI are downloaded from https://pixabay.com/
+  - popcornF.png is downloaded at https://pixabay.com/vectors/popcorn-food-snack-movie-cinema-7525406/
+  - movie.png is downloaded at https://pixabay.com/vectors/camera-video-icon-video-camera-2008489/
+  - clapperboard.png is downloaded at https://pixabay.com/vectors/clapperboard-film-movie-cut-video-311792/
