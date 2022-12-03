@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the Event class
@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // inspired by EventTest class in AlarmSystem
 public class EventTest {
     private Event e;
+    private Event e1;
+    private Event e2;
+    private Event e3;
     private Date d;
 
     private WatchList watchListTest;
@@ -25,6 +28,8 @@ public class EventTest {
     @BeforeEach
     public void runBefore() {
         e = new Event("added to watchlist");
+        e1 = new Event("added to watchlist");
+        e2 = new Event("removed from watchlist");
         d = Calendar.getInstance().getTime();
 
         EventLog.getInstance().clear();
@@ -36,7 +41,23 @@ public class EventTest {
 
     @Test
     public void testEvent() {
+
         assertEquals("added to watchlist", e.getDescription());
+        assertEquals(d, e.getDate());    // test does not pass because exact time is different by the milliseconds
+    }
+
+    @Test
+    public void testEquals() {
+        assertTrue(e.equals(e1));
+        assertFalse(e.equals(e2));
+        assertFalse(e.equals(e3));
+    }
+
+    @Test
+    public void testHashCode() {
+
+        assertTrue(e.hashCode() == e1.hashCode());
+        assertFalse(e.hashCode() == e2.hashCode());
     }
 
     @Test
