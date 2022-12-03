@@ -45,6 +45,7 @@ public class Movie implements Writeable {
     // MODIFIES: this
     // EFFECTS:  marks this movie as watched
     public void markAsWatched() {
+        EventLog.getInstance().logEvent(new Event(this.getTitle() + " is marked as watched."));
         this.watched = true;
     }
 
@@ -57,6 +58,7 @@ public class Movie implements Writeable {
     // EFFECTS:  gives the movie a score
     public void setScore(int score) {
         this.score = score;
+        EventLog.getInstance().logEvent(new Event(this.getTitle() + " is rated " + score + " out of 5."));
     }
 
     // EFFECTS: returns the score of the movie

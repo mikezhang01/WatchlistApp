@@ -54,6 +54,97 @@ frustrating at times. This is why I decided to create this project.
   includes the description of the movie, if the movie has been watched, and the score of the movie. 
   To see these, select a movie from the watchlist then click the Additional Info button. 
 
+## Phase 4: Task 2
+Sample event log:
+
+Fri Dec 02 01:59:37 PST 2022\
+Tenet added to the watchlist.
+
+Fri Dec 02 02:00:21 PST 2022\
+Nope added to the watchlist.
+
+Fri Dec 02 02:01:00 PST 2022\
+Avengers added to the watchlist.
+
+Fri Dec 02 02:01:17 PST 2022\
+Nope is removed from the watchlist.
+
+Fri Dec 02 02:01:24 PST 2022\
+Tenet is marked as watched.
+
+Fri Dec 02 02:01:38 PST 2022\
+Tenet is rated 5 out of 5.
+
+Fri Dec 02 02:01:44 PST 2022\
+Watchlist sorted in alphabetical order.
+
+Fri Dec 02 02:01:49 PST 2022\
+Watchlist Saved to file.
+
+When loading watchlist from file, the event log will log adding all loaded movies to the watchlist,
+along with logging the score of each movie and also log if the movie has been watched. 
+This is because Json reader is 'reconstructing' each movie when parsing from Json object to movie and watchlist. 
+Therefore, the methods of adding movies to the watchlist, as well as setting the score and watched for the movies
+will be logged. The movies are logged in the right order; however, the log display might show a movie is
+rated before it is added to the watchlist. This randomness is due to parsing from Json to movie/watchlist, but all
+the data are stored and displayed properly on the GUI. 
+
+Here is an example of the event log when loading watchlist from a saved file, continuing
+from the example above:
+
+Fri Dec 02 02:16:05 PST 2022\
+Avengers is rated 0 out of 5.
+
+Fri Dec 02 02:16:05 PST 2022\
+Avengers added to the watchlist.
+
+Fri Dec 02 02:16:05 PST 2022\
+Tenet is rated 5 out of 5.
+
+Fri Dec 02 02:16:05 PST 2022\
+Tenet is marked as watched.
+
+Fri Dec 02 02:16:05 PST 2022\
+Tenet added to the watchlist.
+
+## Phase 4: Task 3
+
+Refactorings I would do to improve my design:
+
+- The first one I noticed is a small code duplication in the GUI Class where each time I add to 
+watchlist I would reuse the same lines of codes where I get the Movie's title, year, duration, and description
+as a string then store it as a variable to be printed out. This duplication can be seen in the createWatchList() method, 
+and in the SortListener, AddListener, and LoadListener classes. To avoid this duplicate code use, I can create a new method
+in GUI that does this and call on that method everytime. Another way is to add a method in Movie class that
+stores and returns the string I need for each movie and call that method in GUI instead.
+- Another refactoring I would do is to add exception handling. I have set the year and duration as int
+in the Movie class. When adding a movie if the input for these fields does not match the type it would 
+raise an exception which is not handled. The program continues to run but the exception is still displayed.
+To fix this, I can check the input type from the user and throw exceptions if it does not match
+the required type for the field.
+- When looking into the GUI class, it contains many nested classes that are listeners which perform their action
+when the corresponding buttons are pressed. Having many nested classes within GUI goes against the
+Single Responsibility Principle. To increase cohesion, I could make each nested class as their own class outside GUI, 
+and call on method within each class in GUI when the corresponding button is pressed. Since many of the nested classes
+call on methods in GUI to perform their action, I could put the method in the nested class when
+extracting from GUI. For example, LoadListener and SaveListener call loadWatchList and saveWatchList respectively.
+However, I would also need to make sure the nested classes extracted have access to the required fields passed in 
+as parameters for the constructor or the methods. This is because many of the nested classes requires access to the fields of GUI, mainly the JList variable
+and the listModel. 
+- Another refactoring I would do is to try and improve readability of the GUI, specifically about all the
+buttons, panels, labels, and textboxes. I have many small methods that does one step in the creation
+of the GUI, for example method that creates the buttons, method that creates the textboxes, method that creates
+the labels, and methods that added the corresponding buttons and labels to each panel. This makes the beginning parts
+of the code in GUI a little difficult to read as many methods are called in the constructor to construct the GUI display. 
+One way I am thinking of to improve this design is to group all these methods by panel. Within the frame there are
+3 panels, one for displaying the watchlist, one for adding movie to watchlist, and one at the bottom that contains most
+of the buttons. I can group all the methods related to displaying the watchlist, and create a new method that calls
+upon these smaller methods I already made. Similar, I can group all the methods related to adding movie, which
+includes all the textboxes for input, labels, and the add button, then create another method that calls on them. 
+The same can be done with the buttons panel on the bottom. This way, in the constructor I would only need
+to call the 3 methods for the 3 panels. These 3 methods would call on the smaller methods that they need. This
+way the codes are more organized and easier to read.
+
 ## Resources
 
 - GUI's ListSelectionListener is inspired by ListDemo.java from https://docs.oracle.com/javase/tutorial/uiswing/examples/components/index.html

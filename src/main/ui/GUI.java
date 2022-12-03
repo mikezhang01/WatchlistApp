@@ -1,5 +1,8 @@
 package ui;
 
+import model.Event;
+import model.EventLog;
+
 import model.Movie;
 import model.WatchList;
 import persistence.Reader;
@@ -45,8 +48,6 @@ public class GUI extends JPanel implements ListSelectionListener {
     private JScrollPane listScrollPane;
 
     private WatchList watchList;
-    private Movie testMovie1;
-    private Movie testMovie2;
     private Writer jsonWriter;
     private Reader jsonReader;
     private static final String JSON_LOCATION = "./data/watchList.json";
@@ -117,12 +118,7 @@ public class GUI extends JPanel implements ListSelectionListener {
     // and adds each movie's display info from watchList to list Model
     private void createWatchList() {
 
-        //testMovie1 = new Movie("Tenet", 2020, 150, "Action/Sci-fi");
-        //testMovie2 = new Movie("Nope", 2022, 135, "Horror/Sci-fi");
-
         watchList = new WatchList();
-        //watchList.addToList(testMovie1);
-        //watchList.addToList(testMovie2);
 
         listModel = new DefaultListModel();
         for (Movie m : watchList.getFullList()) {
@@ -204,7 +200,7 @@ public class GUI extends JPanel implements ListSelectionListener {
     private void loadWatchList() {
         try {
             watchList = jsonReader.read();
-            System.out.println("Loaded WatchList from " + JSON_LOCATION);
+            //System.out.println("Loaded WatchList from " + JSON_LOCATION);
         } catch (IOException e) {
             System.out.println("Unable to load from file: " + JSON_LOCATION);
         }
@@ -216,7 +212,7 @@ public class GUI extends JPanel implements ListSelectionListener {
             jsonWriter.open();
             jsonWriter.write(watchList);
             jsonWriter.close();
-            System.out.println("Saved WatchList to " + JSON_LOCATION);
+            //System.out.println("Saved WatchList to " + JSON_LOCATION);
         } catch (FileNotFoundException e) {
             System.out.println("Unable to write to file: " + JSON_LOCATION + " because it doesn't exist");
         }
@@ -469,7 +465,7 @@ public class GUI extends JPanel implements ListSelectionListener {
     public static void createAndShowGUI() {
         //Create and set up the window
         JFrame frame = new JFrame("WatchList App");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(656,690);
         frame.setResizable(false);
 
@@ -483,6 +479,18 @@ public class GUI extends JPanel implements ListSelectionListener {
                 ImageIcon("C:\\Users\\paulj\\Desktop\\CPSC 210\\project_s3x1x\\data\\clapperboard.png");
         frame.setIconImage(image1.getImage());
         frame.setVisible(true);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                for (Event next : EventLog.getInstance()) {
+                    System.out.println(next.toString() + "\n");
+                }
+
+                System.exit(0);
+            }
+        });
     }
 
 }

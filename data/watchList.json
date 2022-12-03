@@ -1,11 +1,11 @@
 {"Movies": [
     {
-        "duration": 135,
-        "score": 3,
+        "duration": 181,
+        "score": 0,
         "watched": false,
-        "year": 2022,
-        "description": "Horror/Sci-fi",
-        "title": "Nope"
+        "year": 2019,
+        "description": "Endgame",
+        "title": "Avengers"
     },
     {
         "duration": 150,
@@ -14,13 +14,5 @@
         "year": 2020,
         "description": "Action/Sci-fi",
         "title": "Tenet"
-    },
-    {
-        "duration": 1,
-        "score": 0,
-        "watched": false,
-        "year": 1,
-        "description": "a",
-        "title": "a"
     }
 ]}

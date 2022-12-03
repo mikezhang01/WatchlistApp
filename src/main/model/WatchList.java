@@ -22,8 +22,8 @@ public class WatchList implements Writeable {
     // MODIFIES: this
     // REQUIRES: adds a movie to the watchlist
     public void addToList(Movie movie) {
-
         watchList.add(movie);
+        EventLog.getInstance().logEvent(new Event(movie.getTitle() + " added to the watchlist."));
     }
 
     // EFFECTS: returns the watchlist as a list of movies
@@ -33,6 +33,9 @@ public class WatchList implements Writeable {
 
     // EFFECTS: removes the provided movie from the watchlist and returns true, else return false
     public boolean removeFromList(Movie movie) {
+
+        EventLog.getInstance().logEvent(new Event(movie.getTitle() + " is removed from the watchlist."));
+
         if (watchList.contains(movie)) {
             watchList.remove(movie);
             return true;
@@ -61,6 +64,8 @@ public class WatchList implements Writeable {
     // EFFECTS: returns the watchlist sorted in alphabetical order
     public List<Movie> getListInAlphabetical() {
 
+        EventLog.getInstance().logEvent(new Event("Watchlist sorted in alphabetical order."));
+
         Collections.sort(watchList, (Movie m1, Movie m2) -> m1.getTitle().compareTo(m2.getTitle()));
 
         return watchList;
@@ -69,6 +74,7 @@ public class WatchList implements Writeable {
     // EFFECTS: returns watchlist as a JSONObject
     @Override
     public JSONObject toJson() {
+        EventLog.getInstance().logEvent(new Event("Watchlist Saved to file."));
         JSONObject json = new JSONObject();
         json.put("Movies", moviesToJson());
         return json;
