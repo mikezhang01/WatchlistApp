@@ -33,7 +33,7 @@ public class AdditionalInfo {
         String output = movie.getDescription() + ",  " + watched + ",  " + "Score: " + movie.getScore() + "/5";
         label = new JLabel(output);
         label.setFont(new Font("Zapfino", Font.BOLD,20));
-        ImageIcon image = new ImageIcon("C:\\Users\\paulj\\Desktop\\CPSC 210\\project_s3x1x\\data\\movie.png");
+        ImageIcon image = new ImageIcon("C:\\Users\\mike\\Desktop\\CPSC 210\\project_s3x1x\\data\\movie.png");
         frame.setIconImage(image.getImage());   // changes frame Icon to custom image - visual component
 
         panel.add(label);

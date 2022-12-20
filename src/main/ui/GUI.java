@@ -396,7 +396,7 @@ public class GUI extends JPanel implements ListSelectionListener {
 
             // changes the image to the pop-up window to popcorn - visual component
             ImageIcon image2 = new
-                    ImageIcon("C:\\Users\\paulj\\Desktop\\CPSC 210\\project_s3x1x\\data\\popcornF.png");
+                    ImageIcon("C:\\Users\\mike\\Desktop\\CPSC 210\\project_s3x1x\\data\\popcornF.png");
             JOptionPane.showMessageDialog(null, "Added " + m.getTitle(),
                     "Success!", JOptionPane.PLAIN_MESSAGE, image2);
         }
@@ -476,7 +476,7 @@ public class GUI extends JPanel implements ListSelectionListener {
 
         // changes the frame Icon to a custom image clapperboard - visual component
         ImageIcon image1 = new
-                ImageIcon("C:\\Users\\paulj\\Desktop\\CPSC 210\\project_s3x1x\\data\\clapperboard.png");
+                ImageIcon("C:\\Users\\mike\\Desktop\\CPSC 210\\project_s3x1x\\data\\clapperboard.png");
         frame.setIconImage(image1.getImage());
         frame.setVisible(true);
 
