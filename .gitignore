@@ -1,2 +1,14 @@
-*.class
-workspace.xml
+.idea/
+*.iml
+target/
+build/
+.gradle/
+node_modules/
+.next/
+*.tsbuildinfo
+out/
+dist/
+.env
+.env.local
+.DS_Store
+postgres-data/
