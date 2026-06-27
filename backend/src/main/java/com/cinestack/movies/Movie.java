@@ -59,6 +59,9 @@ public class Movie {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "tmdb_synced_at")
+    private Instant tmdbSyncedAt;
+
     protected Movie() {
     }
 
@@ -82,7 +85,47 @@ public class Movie {
         movie.backdropPath = backdropPath;
         movie.popularity = popularity;
         movie.voteAverage = voteAverage;
+        movie.tmdbSyncedAt = Instant.now();
         return movie;
+    }
+
+    public void refreshFromTmdb(String title, String originalTitle, String overview,
+                                LocalDate releaseDate, Integer runtimeMinutes, String posterPath,
+                                String backdropPath, BigDecimal popularity, BigDecimal voteAverage,
+                                Set<Genre> refreshedGenres) {
+        this.title = title;
+        this.originalTitle = originalTitle;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.runtimeMinutes = runtimeMinutes;
+        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
+        this.popularity = popularity;
+        this.voteAverage = voteAverage;
+        this.genres.clear();
+        this.genres.addAll(refreshedGenres);
+        this.tmdbSyncedAt = Instant.now();
+        this.updatedAt = this.tmdbSyncedAt;
+    }
+
+    public boolean needsTmdbRefresh(Instant refreshCutoff) {
+        return tmdbId != null && (tmdbSyncedAt == null || tmdbSyncedAt.isBefore(refreshCutoff));
+    }
+
+    public void purgeTmdbContent() {
+        this.tmdbId = null;
+        this.title = "Unavailable movie";
+        this.originalTitle = null;
+        this.overview = null;
+        this.releaseDate = null;
+        this.runtimeMinutes = null;
+        this.posterPath = null;
+        this.backdropPath = null;
+        this.popularity = null;
+        this.voteAverage = null;
+        this.genres.clear();
+        this.tmdbSyncedAt = null;
+        this.updatedAt = Instant.now();
     }
 
     public void addGenre(Genre genre) {
@@ -136,5 +179,9 @@ public class Movie {
 
     public Set<Genre> getGenres() {
         return genres;
+    }
+
+    public Instant getTmdbSyncedAt() {
+        return tmdbSyncedAt;
     }
 }

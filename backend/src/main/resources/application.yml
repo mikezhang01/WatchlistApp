@@ -28,6 +28,11 @@ app:
   tmdb:
     api-key: ${TMDB_API_KEY:}
     base-url: https://api.themoviedb.org/3
+    request-min-interval-ms: ${TMDB_REQUEST_MIN_INTERVAL_MS:250}
+    request-max-wait-ms: ${TMDB_REQUEST_MAX_WAIT_MS:2000}
+    cache-refresh-days: ${TMDB_CACHE_REFRESH_DAYS:30}
+    cache-max-age-days: ${TMDB_CACHE_MAX_AGE_DAYS:175}
+    cache-maintenance-cron: ${TMDB_CACHE_MAINTENANCE_CRON:0 15 3 * * *}
+    purge-on-startup: ${TMDB_PURGE_ON_STARTUP:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
-
