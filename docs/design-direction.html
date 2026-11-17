@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CineStack Design Direction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap">
+<style>
+/* Layout: a short brief, then four app screens stacked as framed windows. The page chrome
+   follows the viewer's theme; each frame carries the app's own palette so the proposed
+   dark and light schemes can be compared with the switches. */
+:root {
+  --bg: #f4f3f0; --fg: #1c1e26; --dim: #5d6272; --line: #d9d7d1; --card: #ffffff; --chip: #e9e7e2;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1016; --fg: #ebe9e3; --dim: #a0a5b5; --line: #2b2f3d; --card: #171a23; --chip: #222634; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1016; --fg: #ebe9e3; --dim: #a0a5b5; --line: #2b2f3d; --card: #171a23; --chip: #222634; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55 }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 36px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 40px }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(34px, 6vw, 52px); line-height: 1; margin: 0; letter-spacing: .01em; text-wrap: balance }
+h2 { font-family: var(--display); font-weight: 600; font-size: 26px; line-height: 1.1; margin: 0; letter-spacing: .01em }
+p { margin: 0; max-width: 68ch }
+.lede { color: var(--dim); font-size: 16px }
+.intro { display: flex; flex-direction: column; gap: 14px }
+
+.controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px }
+.control { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.control > span { font-size: 13px; color: var(--dim) }
+.seg { display: inline-flex; background: var(--chip); border-radius: 8px; padding: 3px; gap: 2px }
+.seg button { font: inherit; font-size: 13px; font-weight: 500; border: 0; background: transparent; color: var(--dim); padding: 6px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: 0 0 0 1px var(--line) }
+.seg button:focus-visible, .app button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block }
+
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.decision { border-top: 2px solid var(--fg); padding-top: 10px; display: flex; flex-direction: column; gap: 4px }
+.decision b { font-weight: 600 }
+.decision span { color: var(--dim); font-size: 14px }
+
+.screen { display: flex; flex-direction: column; gap: 12px }
+.screen > p { color: var(--dim) }
+
+/* ---------- the app itself ---------- */
+.app {
+  --a-bg: #12141c; --a-surface: #1a1d28; --a-raised: #242836; --a-line: #303547; --a-fg: #ece9e2; --a-dim: #9da3b4;
+  --a-accent: #f2b43c; --a-on-accent: #1d1505; --a-accent-text: #f2b43c;
+  --s-planned: #8f96aa; --s-watching: #6ea8ff; --s-watched: #5fd0a0; --s-dropped: #e58295;
+  background: var(--a-bg); color: var(--a-fg); border-radius: 12px; border: 1px solid var(--a-line); overflow: hidden; font-size: 14px }
+.app[data-scheme="light"] {
+  --a-bg: #f6f5f1; --a-surface: #ffffff; --a-raised: #efede8; --a-line: #dcd9d2; --a-fg: #1b1d25; --a-dim: #616677;
+  --a-accent-text: #8a5a00; --s-planned: #646b7e; --s-watching: #2563c9; --s-watched: #177a52; --s-dropped: #b83a52 }
+.app[data-accent="teal"] { --a-accent: #2bb5a3; --a-on-accent: #04221e; --a-accent-text: #4fd1c0 }
+.app[data-accent="teal"][data-scheme="light"] { --a-accent-text: #0f766e }
+.app[data-accent="crimson"] { --a-accent: #d9475b; --a-on-accent: #ffffff; --a-accent-text: #ff8a9b }
+.app[data-accent="crimson"][data-scheme="light"] { --a-accent-text: #b3243a }
+
+.app button { font: inherit; cursor: pointer }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 18px; border-bottom: 1px solid var(--a-line); background: var(--a-surface) }
+.mark { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: .04em; text-transform: uppercase }
+.mark i { font-style: normal; color: var(--a-accent-text) }
+.search { flex: 1 1 200px; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 8px; padding: 8px 12px; color: var(--a-dim) }
+.search svg { flex: none }
+.nav { display: flex; align-items: center; gap: 14px; color: var(--a-dim); font-weight: 500 }
+.nav .on { color: var(--a-fg) }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--a-raised); color: var(--a-fg); display: grid; place-items: center; font-size: 12px; font-weight: 600 }
+.body { padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 16px }
+.ptitle { font-family: var(--display); font-weight: 600; font-size: 30px; line-height: 1; letter-spacing: .01em; margin: 0 }
+.sub { color: var(--a-dim) }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px }
+.spread { justify-content: space-between }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 16px 14px }
+.card { display: flex; flex-direction: column; gap: 7px; min-width: 0; position: relative }
+.poster { aspect-ratio: 2 / 3; border-radius: 8px; background: hsl(var(--h) 34% 30%); color: hsl(var(--h) 60% 90%); display: flex; align-items: flex-end; padding: 10px; font-family: var(--display); font-weight: 600; font-size: 19px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; position: relative; overflow: hidden }
+.poster::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 38%; background: hsl(var(--h) 38% 40%) }
+.poster span { position: relative; z-index: 1 }
+.card.sel .poster { outline: 2px solid var(--a-accent); outline-offset: 2px }
+.name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.meta { color: var(--a-dim); font-size: 12.5px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.kind { border: 1px solid var(--a-line); border-radius: 4px; padding: 0 5px; font-size: 11px; line-height: 16px }
+.add { position: absolute; top: 8px; right: 8px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--a-accent); color: var(--a-on-accent); font-size: 20px; line-height: 1; display: grid; place-items: center }
+.add.done { background: var(--a-surface); color: var(--s-watched); border: 1px solid var(--a-line); font-size: 15px }
+.menu { position: absolute; top: 44px; right: 0; left: 0; z-index: 3; background: var(--a-raised); border: 1px solid var(--a-line); border-radius: 8px; padding: 5px; display: flex; flex-direction: column; box-shadow: 0 10px 24px rgba(0,0,0,.28) }
+.menu small { color: var(--a-dim); padding: 4px 8px; font-size: 11.5px }
+.menu div { padding: 6px 8px; border-radius: 5px; display: flex; justify-content: space-between; gap: 8px }
+.menu div.hi { background: var(--a-surface) }
+.menu div em { font-style: normal; color: var(--a-dim) }
+.toast { align-self: flex-end; display: flex; align-items: center; gap: 10px; background: var(--a-raised); border: 1px solid var(--a-line); border-left: 3px solid var(--s-watched); padding: 10px 14px; max-width: 100% }
+.toast u { text-decoration: none; color: var(--a-accent-text); font-weight: 500 }
+
+.btn { border: 1px solid var(--a-line); background: transparent; color: var(--a-fg); border-radius: 8px; padding: 8px 14px; font-weight: 500 }
+.btn.primary { background: var(--a-accent); color: var(--a-on-accent); border-color: transparent; font-weight: 600 }
+.btn.quiet { color: var(--a-dim) }
+.aseg { display: inline-flex; flex-wrap: wrap; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: 8px; padding: 3px; gap: 2px }
+.aseg span { padding: 5px 11px; border-radius: 6px; color: var(--a-dim); font-weight: 500; white-space: nowrap }
+.aseg span.on { background: var(--a-raised); color: var(--a-fg) }
+.aseg span b { font-weight: 400; opacity: .7; margin-left: 4px }
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--c) }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c) }
+.stars { color: var(--a-accent-text); letter-spacing: 1px; font-size: 13px }
+.stars s { text-decoration: none; color: var(--a-line) }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 20px; align-items: start }
+.drawer { background: var(--a-surface); border: 1px solid var(--a-line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px }
+.drawer h3 { margin: 0; font-size: 17px; font-weight: 600 }
+.field { display: flex; flex-direction: column; gap: 6px }
+.field label { font-size: 12.5px; color: var(--a-dim) }
+.note { background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 8px; padding: 9px 11px; min-height: 58px; color: var(--a-dim) }
+.bigstars { font-size: 22px; letter-spacing: 3px }
+
+.backdrop { background: hsl(212 30% 22%); height: 132px; position: relative }
+.backdrop::after { content: ""; position: absolute; inset: auto 0 0 0; height: 46%; background: hsl(212 32% 17%) }
+.title { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 22px; padding: 0 18px 24px; margin-top: -64px; position: relative }
+.title .poster { font-size: 24px }
+.facts { display: flex; flex-direction: column; gap: 12px; padding-top: 74px; min-width: 0 }
+.genres { display: flex; flex-wrap: wrap; gap: 6px }
+.genres span { background: var(--a-raised); border-radius: 999px; padding: 3px 11px; font-size: 12.5px }
+.onlists { border-top: 1px solid var(--a-line); padding-top: 12px; display: flex; flex-direction: column; gap: 8px }
+
+.lists { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px }
+.list { background: var(--a-surface); border: 1px solid var(--a-line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column }
+.collage { display: grid; grid-template-columns: repeat(4, 1fr); height: 86px }
+.collage i { background: hsl(var(--h) 34% 32%) }
+.list div.info { padding: 12px 14px; display: flex; flex-direction: column; gap: 3px }
+.list b { font-weight: 600; font-size: 15px }
+.progress { height: 4px; background: var(--a-raised); border-radius: 2px; overflow: hidden; margin-top: 6px }
+.progress i { display: block; height: 100%; background: var(--s-watched) }
+.newlist { border: 1px dashed var(--a-line); border-radius: 10px; display: grid; place-items: center; color: var(--a-dim); min-height: 150px; font-weight: 500 }
+.foot { border-top: 1px solid var(--a-line); padding: 10px 18px; color: var(--a-dim); font-size: 12px }
+
+@media (max-width: 720px) {
+  .split { grid-template-columns: minmax(0, 1fr) }
+  .title { grid-template-columns: 104px minmax(0, 1fr); gap: 14px }
+  .facts { padding-top: 70px }
+  .ptitle { font-size: 26px }
+}
+</style>
+</head>
+<body style="margin:0">
+<div class="wrap">
+  <header class="intro">
+    <h1>CineStack design direction</h1>
+    <p class="lede">A dark, poster-first look built on Mantine. Posters carry the colour; the interface around them stays quiet, with one accent for actions and ratings. Use the switches to compare the accent options and the light scheme. Posters here are placeholders.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Preview options">
+    <div class="control"><span>Accent</span>
+      <div class="seg" id="accent-seg">
+        <button type="button" id="accent-amber" data-accent="amber" aria-pressed="true"><i class="dot" style="background:#f2b43c"></i>Marquee amber</button>
+        <button type="button" id="accent-teal" data-accent="teal" aria-pressed="false"><i class="dot" style="background:#2bb5a3"></i>Teal</button>
+        <button type="button" id="accent-crimson" data-accent="crimson" aria-pressed="false"><i class="dot" style="background:#d9475b"></i>Curtain red</button>
+      </div>
+    </div>
+    <div class="control"><span>App scheme</span>
+      <div class="seg" id="scheme-seg">
+        <button type="button" id="scheme-dark" data-scheme="dark" aria-pressed="true">Dark</button>
+        <button type="button" id="scheme-light" data-scheme="light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="decisions" aria-label="Design decisions">
+    <div class="decision"><b>Dark by default</b><span>Posters look best on a dark ground. Light stays available from a toggle in the header.</span></div>
+    <div class="decision"><b>Posters, not text rows</b><span>Search and lists become poster grids. The overview moves to the title page.</span></div>
+    <div class="decision"><b>Search in the header</b><span>Finding a title is the main action, so the search box is on every page.</span></div>
+    <div class="decision"><b>One accent</b><span>Used for the main button, the add control and star ratings. Status has its own four colours.</span></div>
+    <div class="decision"><b>Poster-credit headings</b><span>A condensed face for page titles and the wordmark; a plain sans for everything else.</span></div>
+  </section>
+
+  <section class="screen">
+    <h2>Search</h2>
+    <p>Results as a poster grid. The plus button opens a small menu of your lists, and a toast confirms the add. Titles already on a list show a tick.</p>
+    <div class="app" data-accent="amber" data-scheme="dark">
+      <div class="bar">
+        <span class="mark">Cine<i>Stack</i></span>
+        <div class="search"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6 14 14"/></svg><span style="color:var(--a-fg)">heat</span></div>
+        <div class="nav"><span>My lists</span><span class="avatar">MZ</span></div>
+      </div>
+      <div class="body">
+        <div class="row spread"><div><h3 class="ptitle">Results for "heat"</h3><span class="sub">14 titles</span></div>
+          <div class="aseg"><span class="on">All</span><span>Movies</span><span>TV</span></div></div>
+        <div class="grid">
+          <div class="card"><button class="add" type="button" aria-label="Add Heat to a list">+</button>
+            <div class="menu"><small>Add to list</small><div class="hi">Weekend <em>12</em></div><div>Crime classics <em>31</em></div><div>With Dad <em>4</em></div><div style="color:var(--a-accent-text)">New list</div></div>
+            <div class="poster" style="--h:212"><span>Heat</span></div><div class="name">Heat</div><div class="meta">1995 <span class="kind">Movie</span></div></div>
+          <div class="card"><button class="add done" type="button" aria-label="The Heat is on a list">&#10003;</button><div class="poster" style="--h:18"><span>The Heat</span></div><div class="name">The Heat</div><div class="meta">2013 <span class="kind">Movie</span></div></div>
+          <div class="card"><button class="add" type="button" aria-label="Add In the Heat of the Night to a list">+</button><div class="poster" style="--h:42"><span>In the Heat of the Night</span></div><div class="name">In the Heat of the Night</div><div class="meta">1967 <span class="kind">Movie</span></div></div>
+          <div class="card"><button class="add" type="button" aria-label="Add Body Heat to a list">+</button><div class="poster" style="--h:340"><span>Body Heat</span></div><div class="name">Body Heat</div><div class="meta">1981 <span class="kind">Movie</span></div></div>
+          <div class="card"><button class="add" type="button" aria-label="Add Dead Heat to a list">+</button><div class="poster" style="--h:158"><span>Dead Heat</span></div><div class="name">Dead Heat</div><div class="meta">1988 <span class="kind">Movie</span></div></div>
+          <div class="card"><button class="add" type="button" aria-label="Add City Heat to a list">+</button><div class="poster" style="--h:268"><span>City Heat</span></div><div class="name">City Heat</div><div class="meta">1984 <span class="kind">Movie</span></div></div>
+        </div>
+        <div class="toast"><span>Added <b>The Heat</b> to Weekend</span><u>View list</u></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>A watchlist</h2>
+    <p>Filter by status, sort, and click a poster to open its panel: status, your rating, notes and remove. Renaming and deleting the list sit behind the menu button.</p>
+    <div class="app" data-accent="amber" data-scheme="dark">
+      <div class="bar">
+        <span class="mark">Cine<i>Stack</i></span>
+        <div class="search"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6 14 14"/></svg><span>Search movies and TV</span></div>
+        <div class="nav"><span class="on">My lists</span><span class="avatar">MZ</span></div>
+      </div>
+      <div class="body">
+        <div class="row spread">
+          <div><h3 class="ptitle">Crime classics</h3><span class="sub">Private · 31 titles · 19 watched</span></div>
+          <div class="row"><button class="btn" type="button">Sort: recently added</button><button class="btn quiet" type="button" aria-label="List options">&#8943;</button></div>
+        </div>
+        <div class="aseg"><span class="on">All<b>31</b></span><span>Planned<b>9</b></span><span>Watching<b>2</b></span><span>Watched<b>19</b></span><span>Dropped<b>1</b></span></div>
+        <div class="split">
+          <div class="grid">
+            <div class="card sel"><div class="poster" style="--h:212"><span>Heat</span></div><div class="name">Heat</div><div class="meta"><span class="status" style="--c:var(--s-watched)">Watched</span><span class="stars">★★★★<s>★</s></span></div></div>
+            <div class="card"><div class="poster" style="--h:28"><span>Thief</span></div><div class="name">Thief</div><div class="meta"><span class="status" style="--c:var(--s-planned)">Planned</span></div></div>
+            <div class="card"><div class="poster" style="--h:190"><span>The Wire</span></div><div class="name">The Wire</div><div class="meta"><span class="status" style="--c:var(--s-watching)">Watching</span><span class="kind">TV</span></div></div>
+            <div class="card"><div class="poster" style="--h:352"><span>Collateral</span></div><div class="name">Collateral</div><div class="meta"><span class="status" style="--c:var(--s-watched)">Watched</span><span class="stars">★★★★★</span></div></div>
+            <div class="card"><div class="poster" style="--h:95"><span>Ronin</span></div><div class="name">Ronin</div><div class="meta"><span class="status" style="--c:var(--s-dropped)">Dropped</span></div></div>
+            <div class="card"><div class="poster" style="--h:250"><span>Manhunter</span></div><div class="name">Manhunter</div><div class="meta"><span class="status" style="--c:var(--s-planned)">Planned</span></div></div>
+          </div>
+          <aside class="drawer" aria-label="Selected title">
+            <div><h3>Heat</h3><span class="sub">1995 · 2h 50m · Crime, Drama</span></div>
+            <div class="field"><label>Status</label><div class="aseg"><span>Planned</span><span>Watching</span><span class="on">Watched</span><span>Dropped</span></div></div>
+            <div class="field"><label>Your rating</label><span class="stars bigstars">★★★★<s>★</s></span></div>
+            <div class="field"><label>Notes</label><div class="note">The diner scene. Rewatch with Dad.</div></div>
+            <div class="row spread"><button class="btn" type="button">Open title page</button><button class="btn quiet" type="button" style="color:var(--s-dropped)">Remove</button></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>A title page</h2>
+    <p>Backdrop, poster and the facts in one block, with the add button as the single primary action. If the title is already on your lists, they are shown underneath.</p>
+    <div class="app" data-accent="amber" data-scheme="dark">
+      <div class="backdrop"></div>
+      <div class="title">
+        <div class="poster" style="--h:212"><span>Heat</span></div>
+        <div class="facts">
+          <div><h3 class="ptitle">Heat</h3><span class="sub">1995 · 2h 50m · <span class="kind">Movie</span> · TMDB 8.3</span></div>
+          <div class="genres"><span>Crime</span><span>Drama</span><span>Action</span></div>
+          <p>A master thief and the detective hunting him circle each other across Los Angeles as one last score comes together.</p>
+          <div class="row"><button class="btn primary" type="button">Add to list</button><button class="btn" type="button">Mark watched</button></div>
+          <div class="onlists"><span class="sub">On your lists</span>
+            <div class="row spread"><span>Crime classics</span><span class="row"><span class="status" style="--c:var(--s-watched)">Watched</span><span class="stars">★★★★<s>★</s></span></span></div></div>
+        </div>
+      </div>
+      <div class="foot">This product uses the TMDB API but is not endorsed or certified by TMDB.</div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>Home</h2>
+    <p>What you are in the middle of comes first, then your lists as cards with a strip of their posters and how far through each one you are.</p>
+    <div class="app" data-accent="amber" data-scheme="dark">
+      <div class="bar">
+        <span class="mark">Cine<i>Stack</i></span>
+        <div class="search"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.6 10.6 14 14"/></svg><span>Search movies and TV</span></div>
+        <div class="nav"><span class="on">My lists</span><span class="avatar">MZ</span></div>
+      </div>
+      <div class="body">
+        <div><h3 class="ptitle">Watching now</h3></div>
+        <div class="grid">
+          <div class="card"><div class="poster" style="--h:190"><span>The Wire</span></div><div class="name">The Wire</div><div class="meta"><span class="status" style="--c:var(--s-watching)">Watching</span><span class="kind">TV</span></div></div>
+          <div class="card"><div class="poster" style="--h:300"><span>Severance</span></div><div class="name">Severance</div><div class="meta"><span class="status" style="--c:var(--s-watching)">Watching</span><span class="kind">TV</span></div></div>
+        </div>
+        <div class="row spread"><h3 class="ptitle">Your lists</h3><button class="btn primary" type="button">New list</button></div>
+        <div class="lists">
+          <div class="list"><div class="collage"><i style="--h:212"></i><i style="--h:28"></i><i style="--h:190"></i><i style="--h:352"></i></div><div class="info"><b>Crime classics</b><span class="sub">Private · 19 of 31 watched</span><div class="progress"><i style="width:61%"></i></div></div></div>
+          <div class="list"><div class="collage"><i style="--h:18"></i><i style="--h:140"></i><i style="--h:268"></i><i style="--h:48"></i></div><div class="info"><b>Weekend</b><span class="sub">Private · 3 of 13 watched</span><div class="progress"><i style="width:23%"></i></div></div></div>
+          <div class="list"><div class="collage"><i style="--h:330"></i><i style="--h:95"></i><i style="--h:230"></i><i style="--h:170"></i></div><div class="info"><b>With Dad</b><span class="sub">Public · 4 of 4 watched</span><div class="progress"><i style="width:100%"></i></div></div></div>
+          <div class="newlist">Start a new list</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var apps = document.querySelectorAll('.app');
+  function bind(groupId, attr) {
+    var group = document.getElementById(groupId);
+    group.addEventListener('click', function (event) {
+      var button = event.target.closest('button');
+      if (!button) return;
+      var value = button.getAttribute('data-' + attr);
+      group.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b === button)); });
+      apps.forEach(function (app) { app.setAttribute('data-' + attr, value); });
+    });
+  }
+  bind('accent-seg', 'accent');
+  bind('scheme-seg', 'scheme');
+})();
+</script>
+</body>
+</html>
