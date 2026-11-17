@@ -169,24 +169,24 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 ## Phase 3: Hardening before it is public
 
 - [x] Refuse to start with the default `JWT_SECRET` when `SPRING_PROFILES_ACTIVE=prod`.
-- [ ] Session length: tokens last 120 minutes with no refresh, so users are logged out
-      mid-session. Decide: longer-lived token, or refresh tokens.
+- [x] Session length: a login now lasts 7 days (`JWT_EXPIRATION_MINUTES`), up from 120
+      minutes. Chosen over refresh tokens for simplicity. The trade-off: a stolen token
+      works for up to 7 days and cannot be revoked; refresh tokens would fix that later.
 - [x] Rate-limit login and register: 10 a minute per IP (`RateLimitFilter`), returns 429.
 - [x] Search is limited to 30 a minute per IP. Still open: caching recent searches.
       Background: `GET /api/movies/search` is public and every call goes to TMDB through one shared
       4-requests-per-second gate, so one visitor can starve everyone. Require login, or
       limit per IP, and cache recent searches briefly.
 - [x] A malformed date from TMDB is treated as unknown instead of causing a 500.
-- [ ] Give 401 responses the same JSON error body as other errors (they are produced by
-      the security filter, before the exception handler).
+- [x] 401 responses have the same JSON error body as other errors.
 - [ ] `importTmdb` and `get` call TMDB inside a database transaction, holding a
       connection while waiting. Fetch from TMDB first, then open the transaction.
 - [ ] Search paging: the API returns one page with no total, so the UI cannot tell
       when it has reached the last page. Return the page count.
 - [ ] A few frontend tests for the core loop (search, add, update, remove).
 - [x] Swagger UI and the API docs are off under the `prod` profile (`application-prod.yml`).
-- [ ] CI: use `npm ci` with the lockfile; make sure the Testcontainers tests run in
-      GitHub Actions.
+- [x] CI uses `npm ci` with the lockfile. Still to confirm on the first push: the
+      Testcontainers tests run in GitHub Actions.
 
 ---
 
@@ -239,7 +239,6 @@ what you have added, so a fresh database shows nothing.
 
 | # | Decision | Needed by |
 |---|---|---|
-| 2 | Longer token vs refresh tokens | Phase 3 |
 | 3 | Search: require login vs per-IP limit | Phase 3 |
 | 4 | Hosting provider | Phase 4 |
 
@@ -251,6 +250,7 @@ default; amber accent.
 
 ## Log
 
+- 2026-11-17: 7-day sessions, JSON 401 bodies, CI on `npm ci`.
 - 2026-11-17: Phase 3 security items: prod secret check, rate limits, Swagger off in
   prod, safe TMDB date parsing.
 - 2026-11-17: Phase 2 done. Frontend rebuilt on Mantine and checked end to end in a

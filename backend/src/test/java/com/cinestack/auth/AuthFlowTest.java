@@ -71,7 +71,10 @@ class AuthFlowTest extends IntegrationTest {
 
     @Test
     void protectedEndpointsNeedAValidToken() throws Exception {
-        mvc.perform(get("/api/watchlists")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/watchlists"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Log in to continue"));
         mvc.perform(get("/api/watchlists").header("Authorization", "Bearer not-a-real-token"))
                 .andExpect(status().isUnauthorized());
     }

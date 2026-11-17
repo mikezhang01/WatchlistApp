@@ -29,7 +29,8 @@ management:
 app:
   jwt:
     secret: ${JWT_SECRET:change-me-to-a-very-long-development-secret}
-    expiration-minutes: 120
+    # How long a login lasts. There are no refresh tokens, so this is the whole session.
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:10080}
   tmdb:
     api-key: ${TMDB_API_KEY:}
     base-url: https://api.themoviedb.org/3
