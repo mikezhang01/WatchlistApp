@@ -1,4 +1,6 @@
 node_modules/
+tests/
+vitest.config.mts
 .next/
 out/
 dist/

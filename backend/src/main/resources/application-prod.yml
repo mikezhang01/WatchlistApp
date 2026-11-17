@@ -1,4 +1,10 @@
 # Applied when SPRING_PROFILES_ACTIVE=prod. Set that on any public deployment.
+server:
+  # A hosted app sits behind the provider's proxy, so every request appears to come from
+  # the proxy. This reads the visitor's real address from the X-Forwarded-For header the
+  # proxy adds, which the per-IP rate limiter depends on.
+  forward-headers-strategy: native
+
 springdoc:
   api-docs:
     enabled: false

@@ -6,6 +6,9 @@ RUN mvn -q -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+# Run as an unprivileged user rather than root.
+RUN addgroup -S app && adduser -S app -G app
 COPY --from=build /app/target/backend-0.1.0.jar app.jar
+USER app
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

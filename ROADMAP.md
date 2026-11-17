@@ -13,7 +13,8 @@ _Last updated: 2026-11-17_
   one commit ahead of GitHub.
 - **Phase 3 is done** on branch `phase-3-hardening` (not pushed). 33 backend tests and
   15 frontend tests pass.
-- **Next: Phase 4**, deploy.
+- **Phase 4 is in progress.** The parts that do not depend on a host are done on branch
+  `phase-4-deploy-prep`. Waiting on a hosting decision (see the comparison in the log).
 - Reviews, recommendations, public profiles and legacy import/export have working APIs
   but no screens. They come back in Phases 5 and 6.
 
@@ -202,14 +203,17 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 - [ ] Pick hosting. `infra/README.md` assumes AWS (Amplify, App Runner, RDS), which has
       a monthly cost even when idle. Compare with a cheaper setup (for example a small
       container host plus managed Postgres plus static/Next hosting) before committing.
-- [ ] Set `SPRING_PROFILES_ACTIVE=prod`, and configure forwarded headers so the rate
-      limiter sees the visitor's IP rather than the proxy's.
+- [x] Forwarded headers are read under the `prod` profile, so the rate limiter sees the
+      visitor's IP rather than the proxy's. Checked locally with `X-Forwarded-For`.
+- [x] `SPRING_PROFILES_ACTIVE` passes through `docker-compose.yml`. Still to do on the
+      host: set it to `prod`.
+- [x] Both images run as an unprivileged user.
+- [x] Pushed to GitHub; CI is green, including the Testcontainers tests.
 - [ ] Production config: profile, secrets, CORS origin, Flyway on deploy, health check.
-- [ ] The frontend Dockerfile runs `next start`, which Next warns about when
-      `output: "standalone"` is set. Run the standalone server instead.
+- [x] The frontend image runs Next's standalone server. It went from 1.15 GB to 316 MB.
 - [ ] Build and deploy from CI on merge to `main`.
 - [ ] TMDB attribution visible in production (logo and notice are already in place).
-- [ ] README: screenshots, live link, how to run.
+- [x] README: screenshots and how to run. Still to add: the live link.
 
 **MVP is done here.**
 
@@ -257,6 +261,10 @@ default; amber accent.
 
 ## Log
 
+- 2026-11-17: Phases 1 to 3 pushed to `main`; CI green. Deploy prep: slimmer frontend
+  image, non-root containers, forwarded headers, README screenshots. Hosting options
+  compared: Vercel + Fly.io + Neon recommended (about $0 to $7 a month), against
+  Vercel + Render + Neon (free, slow first visit), AWS (about $20 to $25), or a VPS.
 - 2026-11-17: Phase 3 finished: search cache and frontend tests.
 - 2026-11-17: TMDB calls moved out of transactions; search returns its page count.
 - 2026-11-17: 7-day sessions, JSON 401 bodies, CI on `npm ci`.

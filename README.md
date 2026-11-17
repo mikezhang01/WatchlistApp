@@ -1,6 +1,14 @@
 # CineStack
 
-CineStack is a full-stack movie tracking and recommendation SaaS built from the original Java watchlist course project.
+CineStack is a web app for keeping track of the movies and TV shows you want to watch. Search for a title, collect titles into lists, and record what you've watched, how you rated it and what you thought.
+
+It began as a Java desktop app for a university course and was rebuilt as a full-stack web app.
+
+![A watchlist shown as a grid of posters with status and ratings](docs/screenshots/list.jpg)
+
+![A title page with backdrop, poster, genres and overview](docs/screenshots/title.jpg)
+
+Posters and title details come from [TMDB](https://www.themoviedb.org/). This project uses the TMDB API but is not endorsed or certified by TMDB.
 
 The old Swing/local JSON application has been preserved in `legacy-watchlist-app/`. The new project is organized as a modern monorepo with a Spring Boot API, PostgreSQL persistence, a Next.js frontend, Docker-based local development, and AWS-oriented deployment notes.
 
@@ -12,7 +20,8 @@ The old Swing/local JSON application has been preserved in `legacy-watchlist-app
 - Movie metadata: TMDB API integration point
 - Local dev: Docker Compose
 - CI: GitHub Actions
-- Deployment target: AWS Amplify, App Runner, RDS PostgreSQL
+- Tests: JUnit with Testcontainers (backend), Vitest with Testing Library (frontend)
+- Deployment: not deployed yet; see [ROADMAP.md](ROADMAP.md)
 
 ## Repository Layout
 
@@ -21,7 +30,9 @@ legacy-watchlist-app/  Original Java/Swing app
 backend/               Spring Boot REST API
 frontend/              Next.js web app
 infra/                 Deployment notes and future IaC
+docs/                  Design mockup and screenshots
 docker-compose.yml     Local full-stack runtime
+ROADMAP.md             What is done and what is planned
 ```
 
 ## Current Capabilities
