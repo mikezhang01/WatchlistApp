@@ -10,6 +10,7 @@ export type User = {
 export type Movie = {
   id: string;
   tmdbId?: number;
+  mediaType: "MOVIE" | "TV";
   title: string;
   overview?: string;
   releaseDate?: string;

@@ -45,6 +45,7 @@ public class MovieService {
         return movies.findTop20ByTitleContainingIgnoreCaseOrderByPopularityDesc(query).stream()
                 .map(movie -> new MovieSearchResult(
                         movie.getTmdbId(),
+                        movie.getMediaType(),
                         movie.getTitle(),
                         movie.getOverview(),
                         movie.getReleaseDate(),
@@ -70,16 +71,17 @@ public class MovieService {
     }
 
     @Transactional
-    public MovieResponse importTmdb(Long tmdbId) {
-        Movie cached = movies.findByTmdbId(tmdbId).orElse(null);
+    public MovieResponse importTmdb(Long tmdbId, MediaType mediaType) {
+        Movie cached = movies.findByTmdbIdAndMediaType(tmdbId, mediaType).orElse(null);
         if (cached != null) {
             refreshIfStale(cached);
             return MovieResponse.from(cached);
         }
 
-        TmdbClient.TmdbMovieDetails details = loadDetails(tmdbId);
-        Movie movie = Movie.fromTmdb(details.id(), details.title(), details.original_title(),
-                details.overview(), details.parsedReleaseDate(), details.runtime(),
+        TmdbClient.TmdbMovieDetails details = loadDetails(tmdbId, mediaType);
+        Movie movie = Movie.fromTmdb(details.id(), mediaType, details.displayTitle(mediaType),
+                details.displayOriginalTitle(mediaType),
+                details.overview(), details.parsedReleaseDate(mediaType), details.runtimeMinutes(mediaType),
                 details.poster_path(), details.backdrop_path(), details.popularity(),
                 details.vote_average());
         for (Genre genre : resolveGenres(details)) {
@@ -92,9 +94,9 @@ public class MovieService {
         if (movie.getTmdbId() == null) {
             return;
         }
-        TmdbClient.TmdbMovieDetails details = loadDetails(movie.getTmdbId());
-        movie.refreshFromTmdb(details.title(), details.original_title(), details.overview(),
-                details.parsedReleaseDate(), details.runtime(), details.poster_path(),
+        TmdbClient.TmdbMovieDetails details = loadDetails(movie.getTmdbId(), movie.getMediaType());
+        movie.refreshFromTmdb(details.displayTitle(movie.getMediaType()), details.displayOriginalTitle(movie.getMediaType()), details.overview(),
+                details.parsedReleaseDate(movie.getMediaType()), details.runtimeMinutes(movie.getMediaType()), details.poster_path(),
                 details.backdrop_path(), details.popularity(), details.vote_average(), resolveGenres(details));
     }
 
@@ -110,9 +112,9 @@ public class MovieService {
         }
     }
 
-    private TmdbClient.TmdbMovieDetails loadDetails(Long tmdbId) {
+    private TmdbClient.TmdbMovieDetails loadDetails(Long tmdbId, MediaType mediaType) {
         try {
-            return tmdbClient.details(tmdbId)
+            return tmdbClient.details(tmdbId, mediaType)
                     .orElseThrow(() -> new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
                             "TMDB is not configured. Add TMDB_API_KEY and retry."));
         } catch (TmdbApiException ex) {

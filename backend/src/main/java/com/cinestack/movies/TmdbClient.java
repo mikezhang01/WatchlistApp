@@ -45,18 +45,26 @@ public class TmdbClient {
             return List.of();
         }
         return response.results().stream()
-                .map(r -> new MovieSearchResult(r.id(), r.title(), r.overview(), parseDate(r.release_date()), r.poster_path()))
+                .filter(TmdbSearchResult::isSupportedTitle)
+                .map(r -> new MovieSearchResult(
+                        r.id(),
+                        r.mediaType(),
+                        r.displayTitle(),
+                        r.overview(),
+                        parseDate(r.displayDate()),
+                        r.poster_path()
+                ))
                 .toList();
     }
 
-    public Optional<TmdbMovieDetails> details(Long tmdbId) {
+    public Optional<TmdbMovieDetails> details(Long tmdbId, MediaType mediaType) {
         if (!isConfigured()) {
             return Optional.empty();
         }
         TmdbMovieDetails response = execute(() -> restClient.get()
-                .uri(builder -> builder.path("/movie/{id}")
+                .uri(builder -> builder.path("/{mediaType}/{id}")
                         .queryParam("api_key", apiKey)
-                        .build(tmdbId))
+                        .build(mediaType == MediaType.TV ? "tv" : "movie", tmdbId))
                 .retrieve()
                 .body(TmdbMovieDetails.class));
         return Optional.ofNullable(response);
@@ -90,7 +98,7 @@ public class TmdbClient {
     }
 
     private java.net.URI searchUri(UriBuilder builder, String query, int page) {
-        return builder.path("/search/movie")
+        return builder.path("/search/multi")
                 .queryParam("api_key", apiKey)
                 .queryParam("query", query)
                 .queryParam("page", page)
@@ -104,27 +112,80 @@ public class TmdbClient {
         return LocalDate.parse(value);
     }
 
-    public record TmdbSearchResponse(List<TmdbMovie> results) {
+    public record TmdbSearchResponse(List<TmdbSearchResult> results) {
     }
 
-    public record TmdbMovie(Long id, String title, String overview, String release_date, String poster_path) {
+    public record TmdbSearchResult(
+            Long id,
+            String media_type,
+            String title,
+            String name,
+            String overview,
+            String release_date,
+            String first_air_date,
+            String poster_path
+    ) {
+        public boolean isSupportedTitle() {
+            return mediaType() != null;
+        }
+
+        public MediaType mediaType() {
+            if ("movie".equals(media_type)) {
+                return MediaType.MOVIE;
+            }
+            if ("tv".equals(media_type)) {
+                return MediaType.TV;
+            }
+            return null;
+        }
+
+        public String displayTitle() {
+            return mediaType() == MediaType.TV ? name : title;
+        }
+
+        public String displayDate() {
+            return mediaType() == MediaType.TV ? first_air_date : release_date;
+        }
     }
 
     public record TmdbMovieDetails(
             Long id,
             String title,
+            String name,
             String original_title,
+            String original_name,
             String overview,
             String release_date,
+            String first_air_date,
             Integer runtime,
+            List<Integer> episode_run_time,
             String poster_path,
             String backdrop_path,
             BigDecimal popularity,
             BigDecimal vote_average,
             List<TmdbGenre> genres
     ) {
-        public LocalDate parsedReleaseDate() {
-            return release_date == null || release_date.isBlank() ? null : LocalDate.parse(release_date);
+        public String displayTitle(MediaType mediaType) {
+            return mediaType == MediaType.TV ? name : title;
+        }
+
+        public String displayOriginalTitle(MediaType mediaType) {
+            return mediaType == MediaType.TV ? original_name : original_title;
+        }
+
+        public LocalDate parsedReleaseDate(MediaType mediaType) {
+            String value = mediaType == MediaType.TV ? first_air_date : release_date;
+            return value == null || value.isBlank() ? null : LocalDate.parse(value);
+        }
+
+        public Integer runtimeMinutes(MediaType mediaType) {
+            if (mediaType == MediaType.MOVIE) {
+                return runtime;
+            }
+            if (episode_run_time == null || episode_run_time.isEmpty()) {
+                return null;
+            }
+            return episode_run_time.get(0);
         }
     }
 

@@ -8,6 +8,7 @@ const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
 type SearchResult = {
   tmdbId?: number;
+  mediaType: "MOVIE" | "TV";
   title: string;
   overview?: string;
   releaseDate?: string;
@@ -59,9 +60,9 @@ export default function MovieSearchPage() {
     await runSearch(query, nextPage);
   }
 
-  async function importAndAdd(tmdbId?: number) {
+  async function importAndAdd(tmdbId?: number, mediaType?: "MOVIE" | "TV") {
     if (!tmdbId || !selectedList) return;
-    const movie = await api<Movie>(`/api/movies/import/tmdb/${tmdbId}`, { method: "POST" });
+    const movie = await api<Movie>(`/api/movies/import/tmdb/${tmdbId}?mediaType=${mediaType ?? "MOVIE"}`, { method: "POST" });
     await api(`/api/watchlists/${selectedList}/items`, {
       method: "POST",
       body: JSON.stringify({ movieId: movie.id, status: "PLANNED" })
@@ -104,11 +105,16 @@ export default function MovieSearchPage() {
                 )}
               </div>
               <div className="min-w-0">
-                <h2 className="font-medium">{result.title}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-medium">{result.title}</h2>
+                  <span className="rounded border border-line px-2 py-0.5 text-xs text-neutral-600">
+                    {result.mediaType === "TV" ? "TV" : "Movie"}
+                  </span>
+                </div>
                 <p className="text-sm text-neutral-600">{result.releaseDate}</p>
                 <p className="mt-2 text-sm leading-6">{result.overview || "No overview available."}</p>
               </div>
-              <Button className="sm:w-24" type="button" onClick={() => importAndAdd(result.tmdbId)} disabled={!selectedList || !result.tmdbId}>Add</Button>
+              <Button className="sm:w-24" type="button" onClick={() => importAndAdd(result.tmdbId, result.mediaType)} disabled={!selectedList || !result.tmdbId}>Add</Button>
             </div>
           </Panel>
         ))}

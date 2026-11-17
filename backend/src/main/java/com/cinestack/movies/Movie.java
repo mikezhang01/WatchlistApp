@@ -10,13 +10,20 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "movies")
+@Table(
+        name = "movies",
+        uniqueConstraints = @UniqueConstraint(name = "uq_movies_tmdb_media_type", columnNames = {"tmdb_id", "media_type"})
+)
 public class Movie {
     @Id
     private UUID id;
 
-    @Column(name = "tmdb_id", unique = true)
+    @Column(name = "tmdb_id")
     private Long tmdbId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "media_type", nullable = false)
+    private MediaType mediaType = MediaType.MOVIE;
 
     @Column(nullable = false)
     private String title;
@@ -67,6 +74,7 @@ public class Movie {
 
     public Movie(String title, Integer runtimeMinutes, String overview) {
         this.id = UUID.randomUUID();
+        this.mediaType = MediaType.MOVIE;
         this.title = title;
         this.runtimeMinutes = runtimeMinutes;
         this.overview = overview;
@@ -74,11 +82,12 @@ public class Movie {
         this.updatedAt = this.createdAt;
     }
 
-    public static Movie fromTmdb(Long tmdbId, String title, String originalTitle, String overview,
+    public static Movie fromTmdb(Long tmdbId, MediaType mediaType, String title, String originalTitle, String overview,
                                  LocalDate releaseDate, Integer runtimeMinutes, String posterPath,
                                  String backdropPath, BigDecimal popularity, BigDecimal voteAverage) {
         Movie movie = new Movie(title, runtimeMinutes, overview);
         movie.tmdbId = tmdbId;
+        movie.mediaType = mediaType;
         movie.originalTitle = originalTitle;
         movie.releaseDate = releaseDate;
         movie.posterPath = posterPath;
@@ -114,7 +123,7 @@ public class Movie {
 
     public void purgeTmdbContent() {
         this.tmdbId = null;
-        this.title = "Unavailable movie";
+        this.title = "Unavailable title";
         this.originalTitle = null;
         this.overview = null;
         this.releaseDate = null;
@@ -139,6 +148,10 @@ public class Movie {
 
     public Long getTmdbId() {
         return tmdbId;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
     }
 
     public String getTitle() {

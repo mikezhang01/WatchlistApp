@@ -27,8 +27,9 @@ public class MovieController {
     }
 
     @PostMapping("/import/tmdb/{tmdbId}")
-    MovieResponse importTmdb(@PathVariable Long tmdbId) {
-        return movieService.importTmdb(tmdbId);
+    MovieResponse importTmdb(@PathVariable Long tmdbId,
+                             @RequestParam(defaultValue = "MOVIE") MediaType mediaType) {
+        return movieService.importTmdb(tmdbId, mediaType);
     }
 
     @GetMapping("/popular")
@@ -36,4 +37,3 @@ public class MovieController {
         return movieService.popular();
     }
 }
-

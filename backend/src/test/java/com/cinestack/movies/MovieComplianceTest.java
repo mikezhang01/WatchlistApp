@@ -14,6 +14,7 @@ class MovieComplianceTest {
     void importedMovieTracksSyncTimeAndRefreshEligibility() {
         Movie movie = Movie.fromTmdb(
                 42L,
+                MediaType.MOVIE,
                 "Example",
                 "Example Original",
                 "Overview",
@@ -34,6 +35,7 @@ class MovieComplianceTest {
     void purgeRemovesTmdbContentButKeepsMovieRecord() {
         Movie movie = Movie.fromTmdb(
                 42L,
+                MediaType.MOVIE,
                 "Example",
                 "Example Original",
                 "Overview",
@@ -49,7 +51,7 @@ class MovieComplianceTest {
         movie.purgeTmdbContent();
 
         assertNull(movie.getTmdbId());
-        assertEquals("Unavailable movie", movie.getTitle());
+        assertEquals("Unavailable title", movie.getTitle());
         assertNull(movie.getOverview());
         assertNull(movie.getPosterPath());
         assertNull(movie.getBackdropPath());
@@ -57,4 +59,3 @@ class MovieComplianceTest {
         assertEquals(Set.of(), movie.getGenres());
     }
 }
-

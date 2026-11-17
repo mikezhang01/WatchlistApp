@@ -12,6 +12,7 @@ public final class MovieDtos {
     public record MovieResponse(
             UUID id,
             Long tmdbId,
+            MediaType mediaType,
             String title,
             String overview,
             LocalDate releaseDate,
@@ -24,6 +25,7 @@ public final class MovieDtos {
             return new MovieResponse(
                     movie.getId(),
                     movie.getTmdbId(),
+                    movie.getMediaType(),
                     movie.getTitle(),
                     movie.getOverview(),
                     movie.getReleaseDate(),
@@ -37,6 +39,7 @@ public final class MovieDtos {
 
     public record MovieSearchResult(
             Long tmdbId,
+            MediaType mediaType,
             String title,
             String overview,
             LocalDate releaseDate,
@@ -44,4 +47,3 @@ public final class MovieDtos {
     ) {
     }
 }
-

@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public interface MovieRepository extends JpaRepository<Movie, UUID> {
-    Optional<Movie> findByTmdbId(Long tmdbId);
+    Optional<Movie> findByTmdbIdAndMediaType(Long tmdbId, MediaType mediaType);
 
     List<Movie> findTop20ByTitleContainingIgnoreCaseOrderByPopularityDesc(String title);
 
