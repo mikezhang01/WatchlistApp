@@ -1,0 +1,80 @@
+.hero {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: clamp(2.5rem, 7vw, 3.75rem);
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cs-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--cs-surface);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease;
+}
+
+.list:hover,
+.list:focus-visible {
+  border-color: var(--mantine-primary-color-filled);
+  outline: none;
+}
+
+.collage {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 5.5rem;
+  background: var(--mantine-color-default-hover);
+}
+
+.collage > * {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.collage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swatch {
+  background: hsl(var(--poster-hue) 34% 32%);
+}
+
+.newList {
+  display: grid;
+  place-items: center;
+  min-height: 9.5rem;
+  border: 1px dashed var(--cs-border);
+  border-radius: var(--mantine-radius-md);
+  background: none;
+  color: var(--mantine-color-dimmed);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.newList:hover,
+.newList:focus-visible {
+  border-color: var(--mantine-primary-color-filled);
+  color: var(--mantine-color-text);
+  outline: none;
+}

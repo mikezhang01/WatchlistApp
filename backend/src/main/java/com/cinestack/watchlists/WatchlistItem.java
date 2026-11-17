@@ -67,6 +67,10 @@ public class WatchlistItem {
         return status;
     }
 
+    public Instant getAddedAt() {
+        return addedAt;
+    }
+
     public Instant getWatchedAt() {
         return watchedAt;
     }

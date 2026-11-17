@@ -1,81 +1,86 @@
+"use client";
+
 import Link from "next/link";
+import { Anchor, Box, Center, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { ExternalLink, Film, ShieldCheck } from "lucide-react";
-import { PageTitle, Panel } from "../../components/ui";
 import { TmdbLogo } from "../../components/tmdb-logo";
 
 export default function AboutPage() {
   return (
-    <>
-      <PageTitle
-        title="About CineStack"
-        subtitle="A non-commercial portfolio application for organizing and discussing movies."
-      />
-
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="space-y-6">
-          <Panel>
-            <div className="flex items-start gap-3">
-              <Film className="mt-0.5 text-accent" size={22} />
-              <div>
-                <h2 className="text-lg font-semibold">The project</h2>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">
-                  CineStack lets users create public or private watchlists, track viewing status,
-                  rate and review movies, and discover titles through movie search. It is an
-                  educational portfolio project and does not charge users or display advertising.
-                </p>
-              </div>
-            </div>
-          </Panel>
-
-          <Panel>
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 text-accent" size={22} />
-              <div>
-                <h2 className="text-lg font-semibold">Data and independence</h2>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">
-                  Account details, watchlists, ratings, reviews, and notes are CineStack user data.
-                  Movie metadata retrieved from TMDB is cached temporarily and refreshed or removed
-                  according to the configured retention policy. CineStack is independently developed.
-                </p>
-              </div>
-            </div>
-          </Panel>
-        </section>
-
-        <Panel>
-          <div className="space-y-4">
-            <div className="flex min-h-20 items-center justify-center rounded border border-dashed border-line bg-panel p-4">
-              <TmdbLogo />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">TMDB attribution</h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-700">
-                This application uses TMDB and the TMDB APIs but is not endorsed, certified, or
-                otherwise approved by TMDB.
-              </p>
-            </div>
-            <div className="grid gap-2 text-sm">
-              <a
-                className="inline-flex items-center gap-2 font-medium text-accent"
-                href="https://www.themoviedb.org/about/logos-attribution"
-                rel="noreferrer"
-                target="_blank"
-              >
-                TMDB logos and attribution <ExternalLink size={14} />
-              </a>
-              <a
-                className="inline-flex items-center gap-2 font-medium text-accent"
-                href="https://www.themoviedb.org/api-terms-of-use"
-                rel="noreferrer"
-                target="_blank"
-              >
-                TMDB API Terms of Use <ExternalLink size={14} />
-              </a>
-              <Link className="font-medium text-accent" href="/dashboard">Return to dashboard</Link>
-            </div>
-          </div>
-        </Panel>
+    <Stack gap="lg">
+      <div>
+        <Title order={1}>About CineStack</Title>
+        <Text c="dimmed">A non-commercial portfolio application for organizing movies and TV shows.</Text>
       </div>
-    </>
+
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+        <Stack gap="lg">
+          <Section icon={<Film size={22} />} title="The project">
+            CineStack lets users create public or private watchlists, track viewing status, rate titles, and discover
+            them through search. It is an educational portfolio project and does not charge users or display
+            advertising.
+          </Section>
+          <Section icon={<ShieldCheck size={22} />} title="Data and independence">
+            Account details, watchlists, ratings, and notes are CineStack user data. Movie and TV metadata retrieved
+            from TMDB is cached temporarily and refreshed or removed according to the configured retention policy.
+            CineStack is independently developed.
+          </Section>
+        </Stack>
+
+        <Paper withBorder p="lg" bg="var(--cs-surface)">
+          <Stack gap="md">
+            <Center mih={80} p="md" style={{ border: "1px dashed var(--cs-border)", borderRadius: "var(--mantine-radius-md)" }}>
+              <TmdbLogo />
+            </Center>
+            <div>
+              <Title order={2} size="h3">
+                TMDB attribution
+              </Title>
+              <Text size="sm" mt={6}>
+                This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by
+                TMDB.
+              </Text>
+            </div>
+            <Stack gap={6}>
+              <ExternalAnchor href="https://www.themoviedb.org/about/logos-attribution">TMDB logos and attribution</ExternalAnchor>
+              <ExternalAnchor href="https://www.themoviedb.org/api-terms-of-use">TMDB API Terms of Use</ExternalAnchor>
+              <Anchor component={Link} href="/" size="sm" className="cs-accent-text">
+                Return home
+              </Anchor>
+            </Stack>
+          </Stack>
+        </Paper>
+      </SimpleGrid>
+    </Stack>
+  );
+}
+
+function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <Paper withBorder p="lg" bg="var(--cs-surface)">
+      <Group align="flex-start" wrap="nowrap" gap="md">
+        <Box className="cs-accent-text" mt={2}>
+          {icon}
+        </Box>
+        <div>
+          <Title order={2} size="h3">
+            {title}
+          </Title>
+          <Text size="sm" mt={6}>
+            {children}
+          </Text>
+        </div>
+      </Group>
+    </Paper>
+  );
+}
+
+function ExternalAnchor({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Anchor href={href} target="_blank" rel="noreferrer" size="sm" className="cs-accent-text">
+      <Group gap={6} component="span" display="inline-flex">
+        {children} <ExternalLink size={14} />
+      </Group>
+    </Anchor>
   );
 }

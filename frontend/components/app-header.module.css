@@ -1,0 +1,28 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--cs-surface);
+  border-bottom: 1px solid var(--cs-border);
+}
+
+.mark {
+  font-family: var(--mantine-font-family-headings);
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: inherit;
+  flex: none;
+}
+
+.mark span {
+  color: var(--cs-accent-text);
+}
+
+.search {
+  flex: 1;
+  min-width: 0;
+  max-width: 34rem;
+}

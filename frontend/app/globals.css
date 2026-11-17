@@ -1,20 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-* {
-  box-sizing: border-box;
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: #fbfaf8;
-  color: #202124;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+/* The accent used as text or an icon colour. It is darker in the light scheme so it stays readable. */
+.cs-accent-text {
+  color: var(--cs-accent-text);
 }
 
+a {
+  color: inherit;
+}

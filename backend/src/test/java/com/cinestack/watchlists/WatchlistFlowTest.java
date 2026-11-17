@@ -34,6 +34,7 @@ class WatchlistFlowTest extends IntegrationTest {
                 .andExpect(jsonPath("$[0].name").value("Weekend"))
                 .andExpect(jsonPath("$[0].items", hasSize(1)))
                 .andExpect(jsonPath("$[0].items[0].status").value("PLANNED"))
+                .andExpect(jsonPath("$[0].items[0].addedAt", notNullValue()))
                 .andExpect(jsonPath("$[0].items[0].movie.title").value("Heat"))
                 .andExpect(jsonPath("$[0].items[0].movie.genres", containsInAnyOrder("Crime", "Drama")));
 

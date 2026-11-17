@@ -24,6 +24,8 @@ class MovieImportTest extends IntegrationTest {
                 .andExpect(jsonPath("$.title").value("Heat"))
                 .andExpect(jsonPath("$.releaseDate").value("1995-12-15"))
                 .andExpect(jsonPath("$.runtimeMinutes").value(170))
+                .andExpect(jsonPath("$.posterPath").value("/poster.jpg"))
+                .andExpect(jsonPath("$.backdropPath").value("/backdrop.jpg"))
                 .andExpect(jsonPath("$.genres", containsInAnyOrder("Crime", "Drama")));
     }
 

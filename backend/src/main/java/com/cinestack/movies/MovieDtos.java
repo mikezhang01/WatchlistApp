@@ -18,6 +18,7 @@ public final class MovieDtos {
             LocalDate releaseDate,
             Integer runtimeMinutes,
             String posterPath,
+            String backdropPath,
             BigDecimal voteAverage,
             List<String> genres
     ) {
@@ -31,6 +32,7 @@ public final class MovieDtos {
                     movie.getReleaseDate(),
                     movie.getRuntimeMinutes(),
                     movie.getPosterPath(),
+                    movie.getBackdropPath(),
                     movie.getVoteAverage(),
                     movie.getGenres().stream().map(Genre::getName).sorted().toList()
             );

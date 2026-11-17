@@ -32,6 +32,7 @@ public class Watchlist {
     private Visibility visibility = Visibility.PRIVATE;
 
     @OneToMany(mappedBy = "watchlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("addedAt DESC")
     private List<WatchlistItem> items = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)

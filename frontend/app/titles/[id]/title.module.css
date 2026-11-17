@@ -1,0 +1,64 @@
+/* The backdrop runs behind the top of the page; the fade blends it into the page colour. */
+.backdrop {
+  position: relative;
+  height: 15rem;
+  margin: calc(var(--mantine-spacing-xl) * -1) 0 0;
+  border-radius: 0 0 var(--mantine-radius-md) var(--mantine-radius-md);
+  background-color: var(--mantine-color-default-hover);
+  background-size: cover;
+  background-position: center 25%;
+  overflow: hidden;
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 20%, var(--mantine-color-body) 100%);
+}
+
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 1.75rem;
+  margin-top: -6rem;
+}
+
+.facts {
+  padding-top: 6.5rem;
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .backdrop {
+    height: 10rem;
+  }
+
+  .layout {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: -3.5rem;
+  }
+
+  .facts {
+    padding-top: 4rem;
+  }
+}
+
+.onList {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cs-border);
+  border-radius: var(--mantine-radius-md);
+  text-decoration: none;
+  color: inherit;
+}
+
+.onList:hover,
+.onList:focus-visible {
+  border-color: var(--mantine-primary-color-filled);
+  outline: none;
+}

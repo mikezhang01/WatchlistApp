@@ -1,0 +1,27 @@
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: $mantine-breakpoint-md) {
+  .withPanel {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+  }
+}
+
+.panel {
+  position: sticky;
+  top: 5rem;
+  padding: 1rem;
+  border: 1px solid var(--cs-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--cs-surface);
+}
+
+/* Lets the row of status filters scroll sideways on a phone instead of wrapping. */
+.filters {
+  overflow-x: auto;
+  max-width: 100%;
+}

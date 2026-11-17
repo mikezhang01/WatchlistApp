@@ -6,7 +6,7 @@ The old Swing/local JSON application has been preserved in `legacy-watchlist-app
 
 ## Stack
 
-- Frontend: Next.js, TypeScript, Tailwind CSS
+- Frontend: Next.js, React 19, TypeScript, Mantine, TanStack Query
 - Backend: Spring Boot 3, Java 21, Spring Security, Spring Data JPA
 - Database: PostgreSQL with Flyway migrations
 - Movie metadata: TMDB API integration point
@@ -28,14 +28,13 @@ docker-compose.yml     Local full-stack runtime
 
 - Email/password registration and JWT login
 - Authenticated user profile endpoint
-- TMDB-backed movie title search and metadata import when `TMDB_API_KEY` is configured
+- TMDB-backed movie and TV search and metadata import when `TMDB_API_KEY` is configured
 - TMDB request pacing, outage fallback, and cache retention enforcement
 - CRUD watchlists with public/private visibility
 - Add, update, and remove watchlist items
 - Mark items watched and add personal ratings
-- Public/private movie reviews
-- Basic local recommendations that exclude movies already in the user's watchlists
-- Legacy JSON watchlist import/export API
+- A dark-by-default interface with a light scheme: poster grids, a title page, and a list page with status, rating and notes
+- API only for now (no screens yet): public/private reviews, basic recommendations, legacy JSON import/export
 
 Filtering by genre/year/rating, genre-weighted recommendations, and a polished import/export UI are not implemented yet.
 
@@ -63,6 +62,8 @@ Start the complete local stack:
 ```powershell
 docker compose up --build
 ```
+
+If something else on your machine already uses port 5432, set `POSTGRES_HOST_PORT` in `.env` (for example `5433`). The backend reaches the database inside Docker's network, so nothing else needs to change.
 
 If you change `NEXT_PUBLIC_API_BASE_URL`, rebuild the frontend because `NEXT_PUBLIC_*` variables are embedded during the Next.js build:
 

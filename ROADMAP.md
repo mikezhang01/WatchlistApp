@@ -5,15 +5,15 @@ Update the checkboxes and the status section as work lands.
 
 ## Status
 
-_Last updated: 2026-11-16_
+_Last updated: 2026-11-17_
 
-- **Phase 1 is done** on branch `phase-1-backend-correctness` (not pushed, not yet
-  merged to `main`). Every API endpoint now works; 26 backend tests pass against a real
-  PostgreSQL with the real migrations.
-- **Next: Phase 2**, the frontend. The three dynamic pages are still broken and the UI
-  still has dead ends, so the app is not usable end to end in a browser yet.
-- `main` is one commit ahead of GitHub; the June work sits on
-  `feature/tv-support-and-auth-state`.
+- **Phases 1 and 2 are done.** The app works end to end in a browser: sign up, search
+  movies and TV, build lists, track status, rating and notes, on the new Mantine design.
+- Work is on branch `phase-2-frontend` (not pushed, not yet merged to `main`). `main` is
+  one commit ahead of GitHub.
+- **Next: Phase 3**, hardening, then Phase 4, deploy.
+- Reviews, recommendations, public profiles and legacy import/export have working APIs
+  but no screens. They come back in Phases 5 and 6.
 
 ## How we work
 
@@ -29,8 +29,8 @@ _Last updated: 2026-11-16_
 A person can sign up, search movies and TV shows, build watchlists, track status and
 rating for each title, and see posters. It is deployed at a public URL.
 
-Out of the first cut, hidden in the UI until they work: reviews, public profiles,
-recommendations, legacy import/export.
+Out of the first cut: reviews, public profiles, recommendations, legacy import/export.
+Their old pages were removed in the redesign and are rebuilt in Phases 5 and 6.
 
 ---
 
@@ -115,34 +115,53 @@ body, because it is produced before the request reaches the exception handler.
 
 ---
 
-## Phase 2: MVP frontend
+## Phase 2: Redesign and MVP frontend — done
 
-### 2.1 Broken pages
+The frontend was rebuilt rather than patched. Design: `docs/design-direction.html`
+(also at https://claude.ai/artifact/VapZxjRCwT9ebWf7VZ9vdX).
 
-- [ ] `/watchlists/[id]`, `/movies/[id]`, `/profile/[userId]` read `params.id`
-      directly. In Next 16 `params` is a Promise, so the id is `undefined`. Switch to
-      `useParams()`.
-- [ ] One place for "401 means logged out": handle it inside `api()` (clear auth, go to
-      login) instead of per page.
-- [ ] Loading, empty and error states on every page. Several pages have no error
-      handling at all today.
+### 2.1 Stack and design
 
-### 2.2 Core loop polish
+- [x] Mantine 9 for components, replacing Tailwind. This needed React 19.
+- [x] Theme in `frontend/lib/theme.ts`: dark by default with a light toggle, amber
+      accent, a condensed heading font, separate colours for the four statuses.
+- [x] TanStack Query for all server data (`frontend/lib/queries.ts`), so every page has
+      the same loading, empty and error states.
+- [x] One place for "401 means logged out": `api()` in `frontend/lib/api.ts` clears the
+      session, and `useRequireAuth` sends the user to login and back.
+- [x] Removed `react-hook-form` and `zod`; forms use Mantine's form package.
 
-- [ ] Search: show the result of "Add" (added, already in list, failed). Today nothing
-      happens on screen.
-- [ ] Watchlist page: poster, year, Movie/TV badge, remove title, filter by status,
-      rename and delete list.
-- [ ] Title page: poster, genres, runtime, "add to list". Link to it from search results
-      and list items (nothing links to it today).
-- [ ] Dashboard: useful empty state for a new account; say "titles" where it says
-      "movies".
-- [ ] Logged-out home: `/` goes to the dashboard, which bounces to login. Send
-      logged-out visitors to search or a simple landing page.
-- [ ] Hide Reviews and Picks from the nav until Phase 5 and 6.
+### 2.2 Pages
 
-**Done when:** a new user can go from sign-up to a list with three titles, one marked
-watched and rated, without seeing an error or a dead end.
+- [x] Header on every page: wordmark, search box, scheme toggle, account menu.
+- [x] `/` home. Signed out: a short landing page with search and sign-up. Signed in:
+      "Watching now", then lists as cards with posters and progress, with an empty state
+      for a new account.
+- [x] `/search`: poster grid, All / Movies / TV filter, paging. The plus button opens a
+      menu of your lists (or makes a new one) and confirms with a toast; titles already
+      on a list show a tick.
+- [x] `/lists/[id]`: status filter with counts, sort, and a side panel for the selected
+      title (status, rating, notes, remove). On a phone the panel is a bottom sheet.
+      Edit details and delete list sit behind the options menu. A public list is
+      read-only for everyone but its owner.
+- [x] `/titles/[id]`: backdrop, poster, facts, genres, "Add to list", and which of your
+      lists it is on.
+- [x] `/login`, `/register`: field-level validation, server errors shown in place,
+      return to the page you came from.
+- [x] `/about`: restyled, TMDB attribution kept. The TMDB notice is in the footer of
+      every page.
+- [x] The three dynamic pages that were broken on Next 16 no longer exist; the new ones
+      read the route id with `useParams()`.
+
+### 2.3 Backend additions for the design
+
+- [x] `backdropPath` on titles; `addedAt` on list items, which come back newest first.
+- [x] `POSTGRES_HOST_PORT` in `docker-compose.yml`, so the database port can be moved
+      when 5432 is taken.
+
+Checked by hand in a production build against real TMDB data: sign-up, login, search,
+add to list, the list panel, edit, remove, delete, the signed-out view of a public list,
+the light scheme, and phone width. There are no automated frontend tests yet.
 
 ---
 
@@ -160,6 +179,9 @@ watched and rated, without seeing an error or a dead end.
       the security filter, before the exception handler).
 - [ ] `importTmdb` and `get` call TMDB inside a database transaction, holding a
       connection while waiting. Fetch from TMDB first, then open the transaction.
+- [ ] Search paging: the API returns one page with no total, so the UI cannot tell
+      when it has reached the last page. Return the page count.
+- [ ] A few frontend tests for the core loop (search, add, update, remove).
 - [ ] Turn off Swagger UI in production, or put it behind auth.
 - [ ] CI: use `npm ci` with the lockfile; make sure the Testcontainers tests run in
       GitHub Actions.
@@ -172,6 +194,8 @@ watched and rated, without seeing an error or a dead end.
       a monthly cost even when idle. Compare with a cheaper setup (for example a small
       container host plus managed Postgres plus static/Next hosting) before committing.
 - [ ] Production config: profile, secrets, CORS origin, Flyway on deploy, health check.
+- [ ] The frontend Dockerfile runs `next start`, which Next warns about when
+      `output: "standalone"` is set. Run the standalone server instead.
 - [ ] Build and deploy from CI on merge to `main`.
 - [ ] TMDB attribution visible in production (logo and notice are already in place).
 - [ ] README: screenshots, live link, how to run.
@@ -182,8 +206,10 @@ watched and rated, without seeing an error or a dead end.
 
 ## Phase 5: Features held back from the MVP
 
-- [ ] Reviews: finish the UI (edit, delete, show on the title page), then unhide.
-- [ ] Public profiles and shareable list links.
+- [ ] Reviews: build the screens (write, edit, delete, show on the title page).
+- [ ] Public profiles, and a "copy link" control on public lists.
+- [ ] Theme options: let a user pick the accent colour (amber, teal, red, as in the
+      design mockup's switch) and remember it.
 - [ ] Legacy import/export UI. Import currently creates a new row per title; match
       against TMDB instead so imports do not duplicate.
 - [ ] Filter and sort by genre, year, rating.
@@ -194,6 +220,7 @@ watched and rated, without seeing an error or a dead end.
 Today "recommendations" is the 20 most popular titles already in the database minus
 what you have added, so a fresh database shows nothing.
 
+- [ ] Bring back a recommendations page ("Picks") once there is something to show.
 - [ ] Seed a catalogue: import TMDB popular and top-rated lists on a schedule, within
       the existing cache rules.
 - [ ] Step 1, no ML: weight genres by the user's ratings and watched history.
@@ -215,8 +242,13 @@ what you have added, so a fresh database shows nothing.
 Decided: entity ids are generated by Hibernate (2026-11-16). `@Version` can be added
 per table later if concurrent edits become a concern.
 
+Decided 2026-11-16: Mantine over shadcn/ui and Ant Design; Tailwind removed; dark by
+default; amber accent.
+
 ## Log
 
+- 2026-11-17: Phase 2 done. Frontend rebuilt on Mantine and checked end to end in a
+  production build.
 - 2026-11-16: Phase 1 done. All endpoints work, 26 backend tests on Testcontainers
   Postgres, cross-user delete and email leak closed.
 - 2026-11-16: June work committed on `feature/tv-support-and-auth-state` as two

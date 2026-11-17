@@ -37,6 +37,7 @@ public final class WatchlistDtos {
             UUID id,
             MovieResponse movie,
             WatchStatus status,
+            Instant addedAt,
             Instant watchedAt,
             Integer personalRating,
             String notes
@@ -46,6 +47,7 @@ public final class WatchlistDtos {
                     item.getId(),
                     MovieResponse.from(item.getMovie()),
                     item.getStatus(),
+                    item.getAddedAt(),
                     item.getWatchedAt(),
                     item.getPersonalRating(),
                     item.getNotes()
