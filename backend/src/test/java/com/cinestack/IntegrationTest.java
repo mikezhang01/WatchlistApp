@@ -51,6 +51,8 @@ public abstract class IntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        // Every test registers users from the same address, so lift the sign-up limit.
+        registry.add("app.rate-limit.auth-per-minute", () -> "100000");
     }
 
     private static final AtomicLong NEXT_TMDB_ID = new AtomicLong(1_000_000);

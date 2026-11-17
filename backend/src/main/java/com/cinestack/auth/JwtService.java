@@ -5,6 +5,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -15,13 +17,21 @@ import java.util.UUID;
 
 @Service
 public class JwtService {
+    static final String DEVELOPMENT_SECRET = "change-me-to-a-very-long-development-secret";
+
     private final SecretKey key;
     private final long expirationMinutes;
 
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.expiration-minutes}") long expirationMinutes
+            @Value("${app.jwt.expiration-minutes}") long expirationMinutes,
+            Environment environment
     ) {
+        // Anyone who knows the signing secret can forge a login for any user, and the
+        // development default is public in this repository.
+        if (environment.acceptsProfiles(Profiles.of("prod")) && DEVELOPMENT_SECRET.equals(secret)) {
+            throw new IllegalStateException("JWT_SECRET must be set to a private value in production");
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMinutes = expirationMinutes;
     }

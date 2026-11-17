@@ -11,7 +11,8 @@ _Last updated: 2026-11-17_
   movies and TV, build lists, track status, rating and notes, on the new Mantine design.
 - Work is on branch `phase-2-frontend` (not pushed, not yet merged to `main`). `main` is
   one commit ahead of GitHub.
-- **Next: Phase 3**, hardening, then Phase 4, deploy.
+- **Phase 3 is partly done** on branch `phase-3-hardening`: the five most important
+  security items. The unchecked Phase 3 items remain, then Phase 4, deploy.
 - Reviews, recommendations, public profiles and legacy import/export have working APIs
   but no screens. They come back in Phases 5 and 6.
 
@@ -167,14 +168,15 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 
 ## Phase 3: Hardening before it is public
 
-- [ ] Refuse to start in production with the default `JWT_SECRET`.
+- [x] Refuse to start with the default `JWT_SECRET` when `SPRING_PROFILES_ACTIVE=prod`.
 - [ ] Session length: tokens last 120 minutes with no refresh, so users are logged out
       mid-session. Decide: longer-lived token, or refresh tokens.
-- [ ] Rate-limit login and register.
-- [ ] `GET /api/movies/search` is public and every call goes to TMDB through one shared
+- [x] Rate-limit login and register: 10 a minute per IP (`RateLimitFilter`), returns 429.
+- [x] Search is limited to 30 a minute per IP. Still open: caching recent searches.
+      Background: `GET /api/movies/search` is public and every call goes to TMDB through one shared
       4-requests-per-second gate, so one visitor can starve everyone. Require login, or
       limit per IP, and cache recent searches briefly.
-- [ ] A malformed date from TMDB throws and returns a 500. Parse defensively.
+- [x] A malformed date from TMDB is treated as unknown instead of causing a 500.
 - [ ] Give 401 responses the same JSON error body as other errors (they are produced by
       the security filter, before the exception handler).
 - [ ] `importTmdb` and `get` call TMDB inside a database transaction, holding a
@@ -182,7 +184,7 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 - [ ] Search paging: the API returns one page with no total, so the UI cannot tell
       when it has reached the last page. Return the page count.
 - [ ] A few frontend tests for the core loop (search, add, update, remove).
-- [ ] Turn off Swagger UI in production, or put it behind auth.
+- [x] Swagger UI and the API docs are off under the `prod` profile (`application-prod.yml`).
 - [ ] CI: use `npm ci` with the lockfile; make sure the Testcontainers tests run in
       GitHub Actions.
 
@@ -193,6 +195,8 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 - [ ] Pick hosting. `infra/README.md` assumes AWS (Amplify, App Runner, RDS), which has
       a monthly cost even when idle. Compare with a cheaper setup (for example a small
       container host plus managed Postgres plus static/Next hosting) before committing.
+- [ ] Set `SPRING_PROFILES_ACTIVE=prod`, and configure forwarded headers so the rate
+      limiter sees the visitor's IP rather than the proxy's.
 - [ ] Production config: profile, secrets, CORS origin, Flyway on deploy, health check.
 - [ ] The frontend Dockerfile runs `next start`, which Next warns about when
       `output: "standalone"` is set. Run the standalone server instead.
@@ -247,6 +251,8 @@ default; amber accent.
 
 ## Log
 
+- 2026-11-17: Phase 3 security items: prod secret check, rate limits, Swagger off in
+  prod, safe TMDB date parsing.
 - 2026-11-17: Phase 2 done. Frontend rebuilt on Mantine and checked end to end in a
   production build.
 - 2026-11-16: Phase 1 done. All endpoints work, 26 backend tests on Testcontainers

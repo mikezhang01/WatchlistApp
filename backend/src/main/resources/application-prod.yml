@@ -1,0 +1,6 @@
+# Applied when SPRING_PROFILES_ACTIVE=prod. Set that on any public deployment.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

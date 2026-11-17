@@ -73,6 +73,21 @@ class ReadEndpointsTest extends IntegrationTest {
                 .andExpect(jsonPath("$.items", hasSize(2)));
     }
 
+    /** Search is open to visitors and spends the TMDB quota, so each address gets 30 a minute. */
+    @Test
+    void searchIsRateLimitedPerAddress() throws Exception {
+        for (int i = 0; i < 30; i++) {
+            mvc.perform(get("/api/movies/search").param("query", "heat").with(request -> {
+                request.setRemoteAddr("203.0.113.9");
+                return request;
+            })).andExpect(status().isOk());
+        }
+        mvc.perform(get("/api/movies/search").param("query", "heat").with(request -> {
+            request.setRemoteAddr("203.0.113.9");
+            return request;
+        })).andExpect(status().isTooManyRequests());
+    }
+
     @Test
     void badInputGetsAJsonErrorNotAServerError() throws Exception {
         TestUser user = register();

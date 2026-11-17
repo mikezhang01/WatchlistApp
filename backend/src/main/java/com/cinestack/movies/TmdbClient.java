@@ -109,7 +109,19 @@ public class TmdbClient {
         if (value == null || value.isBlank()) {
             return null;
         }
-        return LocalDate.parse(value);
+        return parseDateOrNull(value);
+    }
+
+    /** TMDB occasionally sends a date that is not a valid date; treat it as unknown. */
+    static LocalDate parseDateOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value);
+        } catch (java.time.format.DateTimeParseException ex) {
+            return null;
+        }
     }
 
     public record TmdbSearchResponse(List<TmdbSearchResult> results) {
@@ -175,7 +187,7 @@ public class TmdbClient {
 
         public LocalDate parsedReleaseDate(MediaType mediaType) {
             String value = mediaType == MediaType.TV ? first_air_date : release_date;
-            return value == null || value.isBlank() ? null : LocalDate.parse(value);
+            return parseDateOrNull(value);
         }
 
         public Integer runtimeMinutes(MediaType mediaType) {
