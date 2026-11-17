@@ -33,6 +33,8 @@ public class MovieService {
         this.cacheRefreshDays = cacheRefreshDays;
     }
 
+    // Deliberately not transactional: this may wait on TMDB, and a transaction would
+    // hold a database connection for the whole wait.
     public List<MovieSearchResult> search(String query, int page) {
         try {
             List<MovieSearchResult> external = tmdbClient.search(query, page);
@@ -66,6 +68,7 @@ public class MovieService {
         return MovieResponse.from(movie);
     }
 
+    @Transactional(readOnly = true)
     public List<MovieResponse> popular() {
         return movies.findTop20ByOrderByPopularityDesc().stream().map(MovieResponse::from).toList();
     }

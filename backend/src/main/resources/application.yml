@@ -9,6 +9,11 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        # Load lazy relations for up to 50 rows per query instead of one query per row
+        # (a list with 30 titles would otherwise run 30+ extra queries).
+        default_batch_fetch_size: 50
   flyway:
     enabled: true
 

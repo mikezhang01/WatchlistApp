@@ -16,6 +16,7 @@ import java.util.UUID;
 )
 public class Movie {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "tmdb_id")
@@ -73,7 +74,6 @@ public class Movie {
     }
 
     public Movie(String title, Integer runtimeMinutes, String overview) {
-        this.id = UUID.randomUUID();
         this.mediaType = MediaType.MOVIE;
         this.title = title;
         this.runtimeMinutes = runtimeMinutes;

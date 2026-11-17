@@ -9,6 +9,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -34,7 +35,6 @@ public class User {
     }
 
     public User(String email, String passwordHash, String displayName) {
-        this.id = UUID.randomUUID();
         this.email = email.toLowerCase();
         this.passwordHash = passwordHash;
         this.displayName = displayName;

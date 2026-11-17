@@ -7,14 +7,13 @@ Update the checkboxes and the status section as work lands.
 
 _Last updated: 2026-11-16_
 
-- Branch `feature/tv-support-and-auth-state` holds the June work as two commits (TV show
-  support; login-state navigation). Not pushed. `main` is one commit ahead of GitHub.
-- Auth, creating/renaming/deleting a watchlist, updating/removing an item, fetching one
-  title, search and posting a review work.
-- 11 of 24 API calls return a 500 (see Phase 1). Adding a title to a list and viewing
-  lists are among them, so the core loop does not work end to end yet.
-- Tests: one "app starts" test on H2 with Flyway off, one entity test. The migrations
-  have never run in a test.
+- **Phase 1 is done** on branch `phase-1-backend-correctness` (not pushed, not yet
+  merged to `main`). Every API endpoint now works; 26 backend tests pass against a real
+  PostgreSQL with the real migrations.
+- **Next: Phase 2**, the frontend. The three dynamic pages are still broken and the UI
+  still has dead ends, so the app is not usable end to end in a browser yet.
+- `main` is one commit ahead of GitHub; the June work sits on
+  `feature/tv-support-and-auth-state`.
 
 ## How we work
 
@@ -35,73 +34,84 @@ recommendations, legacy import/export.
 
 ---
 
-## Phase 1: Make the core work (backend correctness)
+## Phase 1: Make the core work (backend correctness) — done
 
-Needs Docker Desktop running for the Postgres-backed tests.
+Run the tests with `mvn test` in `backend/` (Docker must be running).
 
-### 1.1 Test harness first
+### 1.1 Test harness
 
-- [ ] Integration test base using Testcontainers Postgres with Flyway on, so V1 to V3
-      run for real. Replace the H2 `contextLoads` test with it.
-- [ ] `AuthFlowTest`: register, login, `/me`, bad password, duplicate email, no token.
-- [ ] `WatchlistFlowTest`: create list, add title, list mine, get one, update item,
-      remove item, delete list. This is the test that is red today.
-- [ ] `WatchlistAccessTest`: private list hidden from others; another user cannot
-      rename, add to, update or delete from my list; the cross-user delete below.
-- [ ] `MovieImportTest`: import a movie and a TV show with TMDB stubbed; importing the
-      same title twice returns the same row.
+- [x] `IntegrationTest` base class: one shared Testcontainers Postgres, Flyway on, so V1
+      to V3 run for real. TMDB is always a mock. Replaced the H2 `contextLoads` test.
+- [x] `AuthFlowTest`: register, login, `/me`, bad password, duplicate email, missing or
+      short password, no token.
+- [x] `WatchlistFlowTest`: create list, add title, list mine, get one, update item,
+      remove item, delete list; duplicate title; invalid rating.
+- [x] `WatchlistAccessTest`: private vs public lists; a stranger cannot change my list;
+      an item cannot be changed through a different list; no email on public profiles.
+- [x] `MovieImportTest`: movie and TV import with TMDB stubbed; same title twice reuses
+      the row; a movie and a show may share a TMDB id.
+- [x] `ReadEndpointsTest`: one pass over the read endpoints that used to return 500
+      (reviews, recommendations, export/import) plus JSON errors for bad input.
+
+Testcontainers was bumped from 1.20.3 to 1.21.4; the older version cannot talk to
+Docker 29.
 
 ### 1.2 Lazy loading outside a transaction (9 endpoints)
 
-Symptom: `LazyInitializationException` on list/get watchlists, public watchlists,
+Symptom was `LazyInitializationException` on list/get watchlists, public watchlists,
 `/api/movies/popular`, `/api/recommendations`, the three review lists, `/api/me/export`.
 
 Idea: a JPA collection like `Watchlist.items` or `Movie.genres` is loaded on first
 access, and that needs an open database session. With `open-in-view: false` the session
 closes when the transaction ends, so reads must happen inside one.
 
-- [ ] Make read methods transactional: `@Transactional(readOnly = true)` on the service
-      classes, with write methods keeping their own `@Transactional`.
-- [ ] Move the query logic out of `RecommendationController` and `MeController` into
-      services, so controllers never touch entities.
-- [ ] Load a watchlist with its items, titles and genres in one query (`@EntityGraph`
-      or a fetch join) so a list with 50 titles is not 100+ queries. Check with SQL
-      logging on.
+- [x] Read methods are transactional: `@Transactional(readOnly = true)` on
+      `WatchlistService`, `ReviewService` and the two new services; write methods keep
+      their own `@Transactional`. `MovieService.search` is deliberately left out so a
+      slow TMDB call does not hold a database connection.
+- [x] Query logic moved out of `RecommendationController` and `MeController` into
+      `RecommendationService` and `LegacyWatchlistService`. Controllers no longer touch
+      entities.
+- [x] Avoid one query per row: `hibernate.default_batch_fetch_size: 50` in
+      `application.yml`. Measured on 3 lists of 12 titles: `GET /api/watchlists` went
+      from 42 queries to 5. (Chosen over `@EntityGraph` because it covers every read
+      path with one setting.)
 
-### 1.3 Adding a title fails (2 endpoints)
+### 1.3 Adding a title failed (2 endpoints)
 
-Symptom: `NonUniqueObjectException` on `POST /api/watchlists/{id}/items` and on legacy
-import.
+Symptom was `NonUniqueObjectException` on `POST /api/watchlists/{id}/items` and on
+legacy import.
 
 Idea: entities set their own UUID in the constructor. Spring Data decides "new or
-existing?" by whether the id is null, so it treats every new entity as existing and
-calls `merge`, which makes a second copy. `addItem` also adds the item to the
-watchlist's collection, which saves the original on commit. Two objects, one id.
+existing?" by whether the id is null, so it treated every new entity as existing and
+called `merge`, which makes a second copy. `addItem` also added the item to the
+watchlist's collection, which saved the original on commit. Two objects, one id.
 
-- [ ] Save the item one way only in `addItem`.
-- [ ] Fix the cause for all five entities so `save()` inserts new rows directly.
-      Options: let Hibernate generate the UUID (`@GeneratedValue(strategy = UUID)`),
-      or add a `@Version` column. Recommended: generated UUIDs, no schema change.
+- [x] Ids are generated by Hibernate (`@GeneratedValue(strategy = GenerationType.UUID)`)
+      on `User`, `Movie`, `Watchlist`, `WatchlistItem`, `Review`. No schema change.
+      `Genre` keeps its assigned id because that id is TMDB's.
+- [x] `Watchlist.addItem` / `removeItem` keep the list and its items in step; the
+      service saves each new item once.
 
 ### 1.4 Security and privacy
 
-- [ ] Cross-user delete: `deleteItem` checks that you own the list in the URL, then
-      deletes any item id. Look the item up by id and list together; 404 otherwise.
-- [ ] Email leak: `GET /api/users/{id}` is public and returns the user's email, and
-      every public watchlist exposes its owner's id. Return a public profile shape
-      (id, display name) there; keep email for `/api/auth/me` only.
-- [ ] Registration with a missing password returns a 500 (`@Size` allows null). Add
-      `@NotBlank`.
+- [x] Cross-user delete: items are now looked up by item id and list id together
+      (`requireItem`), for delete as well as update; 404 otherwise.
+- [x] Email leak: `GET /api/users/{id}` returns `PublicUserResponse` (id, display
+      name). Email is only in `/api/auth/me` and the login/register responses.
+- [x] Registration with a missing password is a 400. Password length is 8 to 72 (bcrypt
+      ignores anything past 72 bytes).
 
 ### 1.5 Error responses
 
-- [ ] Unexpected exceptions return the same JSON error shape as everything else, and
-      are logged with a stack trace.
-- [ ] Unique-constraint races (same title added twice at once, same email registered
-      twice) return 409, not 500.
+- [x] `GlobalExceptionHandler` extends Spring's `ResponseEntityExceptionHandler`, so
+      malformed JSON, a non-UUID in the URL and similar keep their correct 4xx status
+      and use the same JSON error shape. Unexpected exceptions are logged with a stack
+      trace and return a generic 500.
+- [x] Database constraint violations return 409.
 
-**Done when:** all Phase 1 tests are green against Postgres and the endpoint sweep
-shows no 500s.
+Not done here, moved to Phase 3: a 401 from the security filter still has an empty
+body, because it is produced before the request reaches the exception handler.
 
 ---
 
@@ -146,6 +156,10 @@ watched and rated, without seeing an error or a dead end.
       4-requests-per-second gate, so one visitor can starve everyone. Require login, or
       limit per IP, and cache recent searches briefly.
 - [ ] A malformed date from TMDB throws and returns a 500. Parse defensively.
+- [ ] Give 401 responses the same JSON error body as other errors (they are produced by
+      the security filter, before the exception handler).
+- [ ] `importTmdb` and `get` call TMDB inside a database transaction, holding a
+      connection while waiting. Fetch from TMDB first, then open the transaction.
 - [ ] Turn off Swagger UI in production, or put it behind auth.
 - [ ] CI: use `npm ci` with the lockfile; make sure the Testcontainers tests run in
       GitHub Actions.
@@ -194,12 +208,16 @@ what you have added, so a fresh database shows nothing.
 
 | # | Decision | Needed by |
 |---|---|---|
-| 1 | Generated UUIDs vs `@Version` for the entity id fix | 1.3 |
 | 2 | Longer token vs refresh tokens | Phase 3 |
 | 3 | Search: require login vs per-IP limit | Phase 3 |
 | 4 | Hosting provider | Phase 4 |
 
+Decided: entity ids are generated by Hibernate (2026-11-16). `@Version` can be added
+per table later if concurrent edits become a concern.
+
 ## Log
 
+- 2026-11-16: Phase 1 done. All endpoints work, 26 backend tests on Testcontainers
+  Postgres, cross-user delete and email leak closed.
 - 2026-11-16: June work committed on `feature/tv-support-and-auth-state` as two
   commits. Endpoint sweep run (11 of 24 calls fail). Roadmap written.

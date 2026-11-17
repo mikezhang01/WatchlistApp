@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import com.cinestack.users.UserDtos.UserResponse;
+import com.cinestack.users.UserDtos.PublicUserResponse;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    UserResponse get(@PathVariable UUID userId) {
-        return users.findById(userId).map(UserResponse::from)
+    PublicUserResponse get(@PathVariable UUID userId) {
+        return users.findById(userId).map(PublicUserResponse::from)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     }
 

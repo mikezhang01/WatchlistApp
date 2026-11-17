@@ -10,6 +10,7 @@ import java.util.UUID;
 @Table(name = "watchlist_items")
 public class WatchlistItem {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(optional = false)
@@ -40,7 +41,6 @@ public class WatchlistItem {
     }
 
     public WatchlistItem(Watchlist watchlist, Movie movie, WatchStatus status) {
-        this.id = UUID.randomUUID();
         this.watchlist = watchlist;
         this.movie = movie;
         this.status = status;

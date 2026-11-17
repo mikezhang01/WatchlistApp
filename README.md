@@ -96,6 +96,15 @@ Services:
 
 Without a TMDB key, authentication and watchlist APIs still work, but movie search can only return movies already stored in the local database. A new database therefore produces an empty search result until TMDB is configured.
 
+### Backend Tests
+
+```powershell
+cd backend
+mvn test
+```
+
+The tests need Docker running. They start a throwaway PostgreSQL container, apply the real Flyway migrations to it, and call the API over HTTP. TMDB is replaced by a mock, so no API key is needed. See [ROADMAP.md](ROADMAP.md) for what is planned next.
+
 ## TMDB Attribution and Cache Compliance
 
 CineStack includes a persistent TMDB attribution notice and an About page at `/about`. Before enabling TMDB in a public deployment, download an official logo from the [TMDB logos and attribution page](https://www.themoviedb.org/about/logos-attribution) and save it as:

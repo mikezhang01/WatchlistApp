@@ -12,6 +12,7 @@ import java.util.UUID;
 @Table(name = "reviews")
 public class Review {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(optional = false)
@@ -42,7 +43,6 @@ public class Review {
     }
 
     public Review(User user, Movie movie, int rating, String body, Visibility visibility) {
-        this.id = UUID.randomUUID();
         this.user = user;
         this.movie = movie;
         this.rating = rating;

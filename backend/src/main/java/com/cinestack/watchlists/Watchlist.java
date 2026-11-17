@@ -1,6 +1,7 @@
 package com.cinestack.watchlists;
 
 import com.cinestack.common.Visibility;
+import com.cinestack.movies.Movie;
 import com.cinestack.users.User;
 import jakarta.persistence.*;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Table(name = "watchlists")
 public class Watchlist {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(optional = false)
@@ -42,7 +44,6 @@ public class Watchlist {
     }
 
     public Watchlist(User owner, String name, String description, Visibility visibility) {
-        this.id = UUID.randomUUID();
         this.owner = owner;
         this.name = name;
         this.description = description;
@@ -60,6 +61,18 @@ public class Watchlist {
         this.description = description;
         this.visibility = visibility;
         this.updatedAt = Instant.now();
+    }
+
+    /** Creates the item and keeps this list's in-memory items in step with the database. */
+    public WatchlistItem addItem(Movie movie, WatchStatus status) {
+        WatchlistItem item = new WatchlistItem(this, movie, status);
+        items.add(item);
+        return item;
+    }
+
+    /** Removing an item from the list deletes its row (orphanRemoval on the mapping above). */
+    public void removeItem(WatchlistItem item) {
+        items.remove(item);
     }
 
     public UUID getId() {
@@ -86,4 +99,3 @@ public class Watchlist {
         return items;
     }
 }
-

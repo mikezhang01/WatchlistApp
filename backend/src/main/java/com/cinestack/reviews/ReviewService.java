@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class ReviewService {
     private final ReviewRepository reviews;
     private final MovieService movieService;
