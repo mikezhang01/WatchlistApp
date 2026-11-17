@@ -1,7 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { api, Movie, Watchlist } from "../../../lib/api";
+import Link from "next/link";
+import { ApiError, api, Movie, Watchlist } from "../../../lib/api";
+import { authToken, clearAuth } from "../../../lib/auth";
 import { Button, Field, PageTitle, Panel } from "../../../components/ui";
 
 const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
@@ -23,12 +25,23 @@ export default function MovieSearchPage() {
   const [page, setPage] = useState(1);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [watchlistError, setWatchlistError] = useState("");
 
   useEffect(() => {
+    setIsLoggedIn(Boolean(authToken()));
     api<Watchlist[]>("/api/watchlists").then(data => {
       setWatchlists(data);
       setSelectedList(data[0]?.id ?? "");
-    }).catch(() => undefined);
+      setWatchlistError("");
+    }).catch(err => {
+      if (err instanceof ApiError && err.status === 401) {
+        clearAuth();
+        setIsLoggedIn(false);
+        return;
+      }
+      setWatchlistError(err instanceof Error ? err.message : "Could not load watchlists");
+    });
   }, []);
 
   async function runSearch(nextQuery: string, nextPage: number) {
@@ -76,10 +89,22 @@ export default function MovieSearchPage() {
         <form className="grid gap-3 md:grid-cols-[1fr_220px_120px]" onSubmit={search}>
           <Field name="query" placeholder="Search by title" defaultValue={query} required />
           <select className="rounded border border-line px-3 py-2" value={selectedList} onChange={e => setSelectedList(e.target.value)}>
+            {watchlists.length === 0 ? <option value="">No watchlists</option> : null}
             {watchlists.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
           <Button type="submit" disabled={isSearching}>{isSearching ? "Searching..." : "Search"}</Button>
         </form>
+        {!isLoggedIn ? (
+          <p className="mt-3 text-sm text-neutral-600">
+            <Link className="font-medium text-accent" href="/login">Log in</Link> to add titles to a watchlist.
+          </p>
+        ) : watchlists.length === 0 ? (
+          <p className="mt-3 text-sm text-neutral-600">
+            Create a <Link className="font-medium text-accent" href="/watchlists">watchlist</Link> before adding titles.
+          </p>
+        ) : watchlistError ? (
+          <p className="mt-3 text-sm text-berry">{watchlistError}</p>
+        ) : null}
       </Panel>
       <div className="mt-6 grid gap-3">
         {hasSearched && results.length === 0 ? (
@@ -114,7 +139,14 @@ export default function MovieSearchPage() {
                 <p className="text-sm text-neutral-600">{result.releaseDate}</p>
                 <p className="mt-2 text-sm leading-6">{result.overview || "No overview available."}</p>
               </div>
-              <Button className="sm:w-24" type="button" onClick={() => importAndAdd(result.tmdbId, result.mediaType)} disabled={!selectedList || !result.tmdbId}>Add</Button>
+              <Button
+                className="sm:w-24"
+                type="button"
+                onClick={() => importAndAdd(result.tmdbId, result.mediaType)}
+                disabled={!isLoggedIn || !selectedList || !result.tmdbId}
+              >
+                Add
+              </Button>
             </div>
           </Panel>
         ))}

@@ -1,13 +1,19 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { api, AuthResponse } from "../../lib/api";
-import { saveAuth } from "../../lib/auth";
+import { currentUser, saveAuth } from "../../lib/auth";
 import { Button, Field, PageTitle, Panel } from "../../components/ui";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (currentUser()) {
+      window.location.href = "/dashboard";
+    }
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,4 +48,3 @@ export default function LoginPage() {
     </>
   );
 }
-

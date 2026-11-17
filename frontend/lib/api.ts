@@ -1,5 +1,11 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
 export type User = {
   id: string;
   email: string;
@@ -66,11 +72,10 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(error.message ?? "Request failed");
+    throw new ApiError(response.status, error.message ?? "Request failed");
   }
   if (response.status === 204) {
     return undefined as T;
   }
   return response.json() as Promise<T>;
 }
-

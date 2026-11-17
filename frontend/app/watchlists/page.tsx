@@ -2,14 +2,26 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { api, Watchlist } from "../../lib/api";
+import { ApiError, api, Watchlist } from "../../lib/api";
+import { clearAuth } from "../../lib/auth";
 import { Button, Field, PageTitle, Panel, TextArea } from "../../components/ui";
 
 export default function WatchlistsPage() {
   const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
+  const [error, setError] = useState("");
 
   function load() {
-    api<Watchlist[]>("/api/watchlists").then(setWatchlists).catch(() => window.location.href = "/login");
+    api<Watchlist[]>("/api/watchlists").then(data => {
+      setWatchlists(data);
+      setError("");
+    }).catch(err => {
+      if (err instanceof ApiError && err.status === 401) {
+        clearAuth();
+        window.location.href = "/login";
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Could not load watchlists");
+    });
   }
 
   useEffect(load, []);
@@ -32,6 +44,7 @@ export default function WatchlistsPage() {
   return (
     <>
       <PageTitle title="Watchlists" subtitle="Create focused lists and decide which ones are public." />
+      {error ? <p className="mb-4 text-sm text-berry">{error}</p> : null}
       <div className="grid gap-6 md:grid-cols-[360px_1fr]">
         <Panel>
           <form className="grid gap-3" onSubmit={create}>
@@ -56,4 +69,3 @@ export default function WatchlistsPage() {
     </>
   );
 }
-
