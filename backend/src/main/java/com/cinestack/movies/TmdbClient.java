@@ -1,6 +1,7 @@
 package com.cinestack.movies;
 
 import com.cinestack.movies.MovieDtos.MovieSearchResult;
+import com.cinestack.movies.MovieDtos.SearchPage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.http.HttpHeaders;
@@ -33,18 +34,18 @@ public class TmdbClient {
         return apiKey != null && !apiKey.isBlank();
     }
 
-    public List<MovieSearchResult> search(String query, int page) {
+    public SearchPage search(String query, int page) {
         if (!isConfigured()) {
-            return List.of();
+            return new SearchPage(List.of(), page, 0);
         }
         TmdbSearchResponse response = execute(() -> restClient.get()
                 .uri(uriBuilder -> searchUri(uriBuilder, query, page))
                 .retrieve()
                 .body(TmdbSearchResponse.class));
         if (response == null || response.results() == null) {
-            return List.of();
+            return new SearchPage(List.of(), page, 0);
         }
-        return response.results().stream()
+        List<MovieSearchResult> results = response.results().stream()
                 .filter(TmdbSearchResult::isSupportedTitle)
                 .map(r -> new MovieSearchResult(
                         r.id(),
@@ -55,6 +56,9 @@ public class TmdbClient {
                         r.poster_path()
                 ))
                 .toList();
+        // TMDB refuses requests past page 500, whatever total it reports.
+        int totalPages = response.total_pages() == null ? 1 : Math.min(response.total_pages(), 500);
+        return new SearchPage(results, page, totalPages);
     }
 
     public Optional<TmdbMovieDetails> details(Long tmdbId, MediaType mediaType) {
@@ -124,7 +128,7 @@ public class TmdbClient {
         }
     }
 
-    public record TmdbSearchResponse(List<TmdbSearchResult> results) {
+    public record TmdbSearchResponse(List<TmdbSearchResult> results, Integer total_pages) {
     }
 
     public record TmdbSearchResult(

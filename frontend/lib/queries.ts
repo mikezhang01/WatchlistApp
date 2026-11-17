@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, type MediaType, type SearchResult, type Title, type Visibility, type Watchlist, type WatchlistItem } from "./api";
+import { api, type MediaType, type SearchPage, type Title, type Visibility, type Watchlist, type WatchlistItem } from "./api";
 import type { WatchStatus } from "./theme";
 
 /**
@@ -31,7 +31,7 @@ export function useTitle(id: string) {
 export function useSearch(query: string, page: number) {
   return useQuery({
     queryKey: keys.search(query, page),
-    queryFn: () => api<SearchResult[]>(`/api/movies/search?query=${encodeURIComponent(query)}&page=${page}`),
+    queryFn: () => api<SearchPage>(`/api/movies/search?query=${encodeURIComponent(query)}&page=${page}`),
     enabled: query.length > 0,
     // Keep the current page on screen while the next one loads.
     placeholderData: keepPreviousData

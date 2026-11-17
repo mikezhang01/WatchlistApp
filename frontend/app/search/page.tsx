@@ -74,7 +74,8 @@ function SearchResults() {
     );
   }
 
-  const results = search.data ?? [];
+  const results = search.data?.results ?? [];
+  const totalPages = search.data?.totalPages ?? 1;
   const shown = results.filter(result => kind === "ALL" || result.mediaType === kind);
 
   return (
@@ -84,7 +85,7 @@ function SearchResults() {
           <Title order={1}>Results for "{query}"</Title>
           {search.isSuccess ? (
             <Text c="dimmed" size="sm">
-              {page > 1 ? `Page ${page} · ` : ""}
+              {totalPages > 1 ? `Page ${page} of ${totalPages} · ` : ""}
               {titleCount(shown.length)}
             </Text>
           ) : null}
@@ -177,12 +178,12 @@ function SearchResults() {
         </TitleGrid>
       )}
 
-      {search.isSuccess && (page > 1 || results.length > 0) ? (
+      {search.isSuccess && (page > 1 || totalPages > 1) ? (
         <Group justify="center">
           <Button variant="default" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
             Previous
           </Button>
-          <Button variant="default" disabled={results.length === 0} loading={search.isFetching} onClick={() => goToPage(page + 1)}>
+          <Button variant="default" disabled={page >= totalPages} loading={search.isFetching} onClick={() => goToPage(page + 1)}>
             Next
           </Button>
         </Group>

@@ -49,6 +49,12 @@ export type SearchResult = {
   posterPath?: string;
 };
 
+export type SearchPage = {
+  results: SearchResult[];
+  page: number;
+  totalPages: number;
+};
+
 export type WatchlistItem = {
   id: string;
   movie: Title;

@@ -1,5 +1,8 @@
 package com.cinestack;
 
+import com.cinestack.movies.MediaType;
+import com.cinestack.movies.MovieDtos.MovieSearchResult;
+import com.cinestack.movies.MovieDtos.SearchPage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -71,6 +74,18 @@ class ReadEndpointsTest extends IntegrationTest {
         mvc.perform(send(post("/api/me/import/legacy-watchlist"), user, legacy))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items", hasSize(2)));
+    }
+
+    @Test
+    void searchReportsWhichPageThisIsAndHowManyThereAre() throws Exception {
+        org.mockito.Mockito.when(tmdb.search("matrix", 2)).thenReturn(new SearchPage(
+                List.of(new MovieSearchResult(603L, MediaType.MOVIE, "The Matrix", "Overview", null, "/p.jpg")), 2, 3));
+
+        mvc.perform(get("/api/movies/search").param("query", "matrix").param("page", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(2))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.results[0].title").value("The Matrix"));
     }
 
     /** Search is open to visitors and spends the TMDB quota, so each address gets 30 a minute. */

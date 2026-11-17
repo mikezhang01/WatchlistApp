@@ -48,4 +48,8 @@ public final class MovieDtos {
             String posterPath
     ) {
     }
+
+    /** One page of search results, with the page count so the UI knows when to stop. */
+    public record SearchPage(List<MovieSearchResult> results, int page, int totalPages) {
+    }
 }

@@ -1,7 +1,7 @@
 package com.cinestack.movies;
 
 import com.cinestack.movies.MovieDtos.MovieResponse;
-import com.cinestack.movies.MovieDtos.MovieSearchResult;
+import com.cinestack.movies.MovieDtos.SearchPage;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class MovieController {
     }
 
     @GetMapping("/search")
-    List<MovieSearchResult> search(@RequestParam String query, @RequestParam(defaultValue = "1") int page) {
+    SearchPage search(@RequestParam String query, @RequestParam(defaultValue = "1") int page) {
         return movieService.search(query, page);
     }
 

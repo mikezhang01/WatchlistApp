@@ -179,10 +179,11 @@ the light scheme, and phone width. There are no automated frontend tests yet.
       limit per IP, and cache recent searches briefly.
 - [x] A malformed date from TMDB is treated as unknown instead of causing a 500.
 - [x] 401 responses have the same JSON error body as other errors.
-- [ ] `importTmdb` and `get` call TMDB inside a database transaction, holding a
-      connection while waiting. Fetch from TMDB first, then open the transaction.
-- [ ] Search paging: the API returns one page with no total, so the UI cannot tell
-      when it has reached the last page. Return the page count.
+- [x] `importTmdb` and `get` no longer call TMDB inside a database transaction: they
+      read, call TMDB with no connection held, then write (`MovieService`). The nightly
+      cache job still refreshes inside its own transaction; it runs in the background.
+- [x] Search returns `{ results, page, totalPages }`, and the UI shows "Page 2 of 7" and
+      disables Next on the last page.
 - [ ] A few frontend tests for the core loop (search, add, update, remove).
 - [x] Swagger UI and the API docs are off under the `prod` profile (`application-prod.yml`).
 - [x] CI uses `npm ci` with the lockfile. Still to confirm on the first push: the
@@ -250,6 +251,7 @@ default; amber accent.
 
 ## Log
 
+- 2026-11-17: TMDB calls moved out of transactions; search returns its page count.
 - 2026-11-17: 7-day sessions, JSON 401 bodies, CI on `npm ci`.
 - 2026-11-17: Phase 3 security items: prod secret check, rate limits, Swagger off in
   prod, safe TMDB date parsing.
