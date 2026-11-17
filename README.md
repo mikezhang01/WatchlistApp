@@ -97,14 +97,25 @@ Services:
 
 Without a TMDB key, authentication and watchlist APIs still work, but movie search can only return movies already stored in the local database. A new database therefore produces an empty search result until TMDB is configured.
 
-### Backend Tests
+### Tests
+
+Backend:
 
 ```powershell
 cd backend
 mvn test
 ```
 
-The tests need Docker running. They start a throwaway PostgreSQL container, apply the real Flyway migrations to it, and call the API over HTTP. TMDB is replaced by a mock, so no API key is needed. See [ROADMAP.md](ROADMAP.md) for what is planned next.
+The tests need Docker running. They start a throwaway PostgreSQL container, apply the real Flyway migrations to it, and call the API over HTTP. TMDB is replaced by a mock, so no API key is needed. Frontend:
+
+```powershell
+cd frontend
+npm test
+```
+
+These run in a simulated browser with the backend replaced by canned responses, so they need neither Docker nor a running API.
+
+See [ROADMAP.md](ROADMAP.md) for what is planned next.
 
 ## TMDB Attribution and Cache Compliance
 

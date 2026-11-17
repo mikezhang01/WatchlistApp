@@ -38,15 +38,18 @@ public class MovieService {
     private final TmdbClient tmdbClient;
     private final TransactionTemplate transaction;
     private final long cacheRefreshDays;
+    private final SearchCache searchCache;
 
     public MovieService(MovieRepository movies, GenreRepository genres, TmdbClient tmdbClient,
                         PlatformTransactionManager transactionManager,
-                        @Value("${app.tmdb.cache-refresh-days:30}") long cacheRefreshDays) {
+                        @Value("${app.tmdb.cache-refresh-days:30}") long cacheRefreshDays,
+                        @Value("${app.tmdb.search-cache-seconds:300}") long searchCacheSeconds) {
         this.movies = movies;
         this.genres = genres;
         this.tmdbClient = tmdbClient;
         this.transaction = new TransactionTemplate(transactionManager);
         this.cacheRefreshDays = cacheRefreshDays;
+        this.searchCache = new SearchCache(searchCacheSeconds);
     }
 
     /** What we have stored for a title, and whether it is due a refresh from TMDB. */
@@ -54,9 +57,15 @@ public class MovieService {
     }
 
     public SearchPage search(String query, int page) {
+        long now = System.currentTimeMillis();
+        SearchPage recent = searchCache.get(query, page, now);
+        if (recent != null) {
+            return recent;
+        }
         try {
             SearchPage external = tmdbClient.search(query, page);
             if (external != null && !external.results().isEmpty()) {
+                searchCache.put(query, page, external, now);
                 return external;
             }
         } catch (TmdbApiException ex) {

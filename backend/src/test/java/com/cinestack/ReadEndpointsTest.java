@@ -88,6 +88,19 @@ class ReadEndpointsTest extends IntegrationTest {
                 .andExpect(jsonPath("$.results[0].title").value("The Matrix"));
     }
 
+    @Test
+    void aRepeatedSearchIsAnsweredFromTheCacheNotTmdb() throws Exception {
+        org.mockito.Mockito.when(tmdb.search("blade runner", 1)).thenReturn(new SearchPage(
+                List.of(new MovieSearchResult(78L, MediaType.MOVIE, "Blade Runner", "Overview", null, "/p.jpg")), 1, 1));
+
+        mvc.perform(get("/api/movies/search").param("query", "blade runner")).andExpect(status().isOk());
+        mvc.perform(get("/api/movies/search").param("query", "Blade Runner "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].title").value("Blade Runner"));
+
+        org.mockito.Mockito.verify(tmdb, org.mockito.Mockito.times(1)).search("blade runner", 1);
+    }
+
     /** Search is open to visitors and spends the TMDB quota, so each address gets 30 a minute. */
     @Test
     void searchIsRateLimitedPerAddress() throws Exception {

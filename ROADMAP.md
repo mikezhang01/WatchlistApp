@@ -7,12 +7,13 @@ Update the checkboxes and the status section as work lands.
 
 _Last updated: 2026-11-17_
 
-- **Phases 1 and 2 are done.** The app works end to end in a browser: sign up, search
+- **Phases 1, 2 and 3 are done.** The app works end to end in a browser: sign up, search
   movies and TV, build lists, track status, rating and notes, on the new Mantine design.
 - Work is on branch `phase-2-frontend` (not pushed, not yet merged to `main`). `main` is
   one commit ahead of GitHub.
-- **Phase 3 is partly done** on branch `phase-3-hardening`: the five most important
-  security items. The unchecked Phase 3 items remain, then Phase 4, deploy.
+- **Phase 3 is done** on branch `phase-3-hardening` (not pushed). 33 backend tests and
+  15 frontend tests pass.
+- **Next: Phase 4**, deploy.
 - Reviews, recommendations, public profiles and legacy import/export have working APIs
   but no screens. They come back in Phases 5 and 6.
 
@@ -166,14 +167,16 @@ the light scheme, and phone width. There are no automated frontend tests yet.
 
 ---
 
-## Phase 3: Hardening before it is public
+## Phase 3: Hardening before it is public — done
 
 - [x] Refuse to start with the default `JWT_SECRET` when `SPRING_PROFILES_ACTIVE=prod`.
 - [x] Session length: a login now lasts 7 days (`JWT_EXPIRATION_MINUTES`), up from 120
       minutes. Chosen over refresh tokens for simplicity. The trade-off: a stolen token
       works for up to 7 days and cannot be revoked; refresh tokens would fix that later.
 - [x] Rate-limit login and register: 10 a minute per IP (`RateLimitFilter`), returns 429.
-- [x] Search is limited to 30 a minute per IP. Still open: caching recent searches.
+- [x] Search is limited to 30 a minute per IP, and TMDB results are cached in memory for
+      5 minutes (`SearchCache`, `app.tmdb.search-cache-seconds`), so repeated searches
+      and paging back and forth do not spend TMDB requests.
       Background: `GET /api/movies/search` is public and every call goes to TMDB through one shared
       4-requests-per-second gate, so one visitor can starve everyone. Require login, or
       limit per IP, and cache recent searches briefly.
@@ -184,7 +187,10 @@ the light scheme, and phone width. There are no automated frontend tests yet.
       cache job still refreshes inside its own transaction; it runs in the background.
 - [x] Search returns `{ results, page, totalPages }`, and the UI shows "Page 2 of 7" and
       disables Next on the last page.
-- [ ] A few frontend tests for the core loop (search, add, update, remove).
+- [x] Frontend tests with Vitest and Testing Library (`npm test` in `frontend/`, also run
+      in CI): the API client (token, 401 sign-out, error mapping), the add-to-list menu,
+      the login and sign-up form, and the list-matching helpers. The list page's side
+      panel is not covered yet.
 - [x] Swagger UI and the API docs are off under the `prod` profile (`application-prod.yml`).
 - [x] CI uses `npm ci` with the lockfile. Still to confirm on the first push: the
       Testcontainers tests run in GitHub Actions.
@@ -251,6 +257,7 @@ default; amber accent.
 
 ## Log
 
+- 2026-11-17: Phase 3 finished: search cache and frontend tests.
 - 2026-11-17: TMDB calls moved out of transactions; search returns its page count.
 - 2026-11-17: 7-day sessions, JSON 401 bodies, CI on `npm ci`.
 - 2026-11-17: Phase 3 security items: prod secret check, rate limits, Swagger off in
